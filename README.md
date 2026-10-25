@@ -7,3 +7,4 @@ Siden er ren HTML uden byggetrin og hostes med GitHub Pages på udlejningsberegn
 - `index.html` er beregneren
 - `privatlivspolitik.html` er privatlivspolitikken for ventelisten
 - Renterne står i `RENTER` i `index.html` og opdateres i hånden
+- `vendor/` har bibliotekerne til PDF og Excel, og `fonts/` har skrifttyperne. Begge hostes selv, så siden ikke henter noget fra tredjeparter

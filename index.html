@@ -3,54 +3,118 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="description" content="Gratis udlejningsberegner til private udlejere: cash flow, afkast og skat for en konkret dansk udlejningsbolig med fast eller variabel rente.">
+<meta name="description" content="Gratis udlejningsberegner til private udlejere: cash flow, afkast og skat for en dansk udlejningsbolig eller ejendom med op til 6 lejemål. Med dagens realkreditrenter og rapport til banken.">
 <meta property="og:title" content="Udlejningsberegneren">
-<meta property="og:description" content="Kan det betale sig at købe og udleje? Regn på en konkret bolig med danske regler.">
+<meta property="og:description" content="Regn på udlejningsboligen, før du byder. Cash flow, afkast og skat med danske regler.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 28 28%22%3E%3Crect width=%2228%22 height=%2228%22 rx=%227%22 fill=%22%231f5f5b%22/%3E%3Cpath d=%22M7 13.5 14 8l7 5.5V21H7z%22 fill=%22none%22 stroke=%22white%22 stroke-width=%221.8%22/%3E%3C/svg%3E">
+<style>
+@font-face { font-family: "Schibsted Grotesk"; font-style: normal; font-weight: 400 900; font-display: swap; src: url(fonts/schibsted-grotesk-latin-wght-normal.woff2) format("woff2"); unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD; }
+@font-face { font-family: "Schibsted Grotesk"; font-style: normal; font-weight: 400 900; font-display: swap; src: url(fonts/schibsted-grotesk-latin-ext-wght-normal.woff2) format("woff2"); unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF; }
+@font-face { font-family: "IBM Plex Mono"; font-style: normal; font-weight: 400; font-display: swap; src: url(fonts/ibm-plex-mono-latin-400-normal.woff2) format("woff2"); }
+@font-face { font-family: "IBM Plex Mono"; font-style: normal; font-weight: 500; font-display: swap; src: url(fonts/ibm-plex-mono-latin-500-normal.woff2) format("woff2"); }
+@font-face { font-family: "IBM Plex Mono"; font-style: normal; font-weight: 600; font-display: swap; src: url(fonts/ibm-plex-mono-latin-600-normal.woff2) format("woff2"); }
+html { -webkit-text-size-adjust: 100%; }
+body { margin: 0; }
+[hidden] { display: none !important; }
+img { max-width: 100%; }
+</style>
 <title>Udlejningsberegneren</title>
 <style>
-/* Layout: et skrivebord med inputs til venstre i grupper og et fast resultatpanel til højre; på mobil kommer nøgletal først. */
+/* Layout: topmenu, intro med en rentetavle, valg af ejendomstype, beregner med inputs til venstre og fast resultatpanel til højre, derefter trin, Pro og spørgsmål. */
 :root {
   --bg: #f4f6f5;
   --panel: #ffffff;
+  --hero: #e7efed;
   --ink: #16201f;
   --muted: #5b6a67;
   --line: #d9e1df;
   --accent: #1f5f5b;
+  --accent-ink: #ffffff;
   --accent-soft: #e2eeec;
   --pos: #2b7a4b;
   --neg: #b13a33;
   --field: #f9fbfa;
-  --display: "Helvetica Neue", Arial, sans-serif;
-  --body: "Helvetica Neue", Arial, sans-serif;
-  --mono: ui-monospace, "SFMono-Regular", Menlo, monospace;
+  --display: "Schibsted Grotesk", "Helvetica Neue", Arial, sans-serif;
+  --body: "Schibsted Grotesk", "Helvetica Neue", Arial, sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
 }
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
-    --bg: #0f1514; --panel: #172120; --ink: #e3ebe9; --muted: #9aaba7; --line: #2a3735;
-    --accent: #72c2b8; --accent-soft: #1d302e; --pos: #7fd19a; --neg: #f08a80; --field: #121a19;
+    --bg: #0f1514; --panel: #172120; --hero: #13201e; --ink: #e3ebe9; --muted: #9aaba7; --line: #2a3735;
+    --accent: #72c2b8; --accent-ink: #0f1514; --accent-soft: #1d302e; --pos: #7fd19a; --neg: #f08a80; --field: #121a19;
     color-scheme: dark;
   }
 }
 :root[data-theme="dark"] {
-  --bg: #0f1514; --panel: #172120; --ink: #e3ebe9; --muted: #9aaba7; --line: #2a3735;
-  --accent: #72c2b8; --accent-soft: #1d302e; --pos: #7fd19a; --neg: #f08a80; --field: #121a19;
+  --bg: #0f1514; --panel: #172120; --hero: #13201e; --ink: #e3ebe9; --muted: #9aaba7; --line: #2a3735;
+  --accent: #72c2b8; --accent-ink: #0f1514; --accent-soft: #1d302e; --pos: #7fd19a; --neg: #f08a80; --field: #121a19;
   color-scheme: dark;
 }
 * { box-sizing: border-box; }
-html { -webkit-text-size-adjust: 100%; }
-body { margin: 0; }
-[hidden] { display: none !important; }
-body {
-  background: var(--bg); color: var(--ink); font-family: var(--body); font-size: 15px; line-height: 1.5;
+body { background: var(--bg); color: var(--ink); font-family: var(--body); font-size: 15px; line-height: 1.5; }
+a { color: var(--accent); }
+.wrap {
+  max-width: 1160px; margin: 0 auto;
   padding-left: max(16px, env(safe-area-inset-left, 0px));
   padding-right: max(16px, env(safe-area-inset-right, 0px));
-  padding-block: 28px 48px;
 }
-.wrap { max-width: 1160px; margin: 0 auto; display: grid; gap: 28px; }
-header { display: grid; gap: 6px; max-width: 70ch; }
+h1, h2, h3 { font-family: var(--display); text-wrap: balance; }
 .eyebrow { font-size: 12px; letter-spacing: .08em; text-transform: uppercase; color: var(--accent); font-weight: 700; }
-h1 { font-family: var(--display); font-weight: 800; font-size: clamp(28px, 4.4vw, 42px); line-height: 1.08; margin: 0; letter-spacing: -.02em; text-wrap: balance; }
-header p { margin: 0; color: var(--muted); }
+
+/* Topmenu */
+.topbar { background: var(--panel); border-bottom: 1px solid var(--line); }
+.bar { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding-block: 14px; }
+.brand { display: flex; align-items: center; gap: 10px; color: var(--ink); text-decoration: none; font-weight: 800; font-size: 17px; letter-spacing: -.01em; }
+.brand svg { flex: none; }
+.brand small { font-weight: 500; color: var(--muted); font-size: 13px; }
+.nav { display: flex; align-items: center; gap: 20px; }
+.nav a { color: var(--ink); text-decoration: none; font-weight: 500; font-size: 14px; }
+.nav a:hover { color: var(--accent); }
+@media (max-width: 720px) { .nav a:not(.btn) { display: none; } .brand small { display: none; } }
+
+/* Knapper */
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; font: 600 14px/1 var(--body); padding: 12px 18px; border-radius: 8px; border: 1px solid var(--accent); background: var(--accent); color: var(--accent-ink) !important; cursor: pointer; text-decoration: none; white-space: nowrap; }
+.btn:hover { filter: brightness(1.07); }
+.btn.ghost { background: transparent; color: var(--accent) !important; }
+.btn.small { padding: 9px 14px; font-size: 13px; }
+.btn:disabled { opacity: .6; cursor: progress; }
+input:focus-visible, select:focus-visible, button:focus-visible, a:focus-visible, summary:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+/* Intro */
+.hero { background: var(--hero); border-bottom: 1px solid var(--line); }
+.hero-grid { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(0, .85fr); gap: 40px; align-items: center; padding-block: 48px 52px; }
+@media (max-width: 880px) { .hero-grid { grid-template-columns: minmax(0, 1fr); gap: 28px; padding-block: 32px 36px; } }
+.hero h1 { font-weight: 800; font-size: clamp(32px, 5.2vw, 54px); line-height: 1.04; letter-spacing: -.025em; margin: 10px 0 14px; }
+.lede { font-size: clamp(16px, 1.8vw, 19px); color: var(--muted); margin: 0 0 24px; max-width: 54ch; }
+.cta-row { display: flex; flex-wrap: wrap; gap: 12px; }
+.points { list-style: none; padding: 0; margin: 26px 0 0; display: flex; flex-wrap: wrap; gap: 8px 20px; font-size: 14px; color: var(--ink); }
+.points li { display: flex; align-items: center; gap: 7px; }
+.points li::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: var(--accent); }
+
+.board { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 20px; display: grid; gap: 4px; box-shadow: 0 10px 30px -18px rgba(16, 40, 38, .35); }
+.board-head { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; margin-bottom: 6px; }
+.board-head b { font-size: 14px; }
+.board-head span { font-size: 12px; color: var(--muted); }
+.rate { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; padding: 10px 0; border-top: 1px solid var(--line); }
+.rate span { color: var(--muted); font-size: 14px; }
+.rate b { font: 600 22px/1 var(--mono); font-variant-numeric: tabular-nums; letter-spacing: -.01em; }
+.board .src { font-size: 12px; color: var(--muted); margin: 6px 0 0; }
+
+/* Beregneren */
+.calc { padding-block: 36px 24px; }
+.section-head { display: grid; gap: 6px; margin-bottom: 18px; max-width: 70ch; }
+.section-head h2 { font-size: clamp(24px, 3vw, 32px); line-height: 1.12; margin: 0; letter-spacing: -.015em; }
+.section-head p { margin: 0; color: var(--muted); }
+.kat { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; margin-bottom: 10px; }
+@media (max-width: 560px) { .kat { grid-template-columns: minmax(0, 1fr); } }
+.kat button { text-align: left; display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 4px 14px; align-items: center; padding: 16px 18px; border-radius: 10px; border: 1.5px solid var(--line); background: var(--panel); color: var(--ink); font: inherit; cursor: pointer; }
+.kat button svg { grid-row: span 2; color: var(--muted); }
+.kat button b { font-size: 16px; }
+.kat button span { color: var(--muted); font-size: 13px; }
+.kat button[aria-checked="true"] { border-color: var(--accent); background: var(--accent-soft); }
+.kat button[aria-checked="true"] svg { color: var(--accent); }
+.exnote { color: var(--muted); font-size: 13px; margin: 0 0 18px; }
+
 .grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr); gap: 24px; align-items: start; }
 @media (max-width: 880px) { .grid { grid-template-columns: minmax(0, 1fr); } .results { order: -1; } }
 .inputs { display: grid; gap: 16px; }
@@ -60,32 +124,43 @@ legend { font-weight: 700; font-size: 13px; letter-spacing: .06em; text-transfor
 @media (max-width: 460px) { .row { grid-template-columns: minmax(0, 1fr); } }
 label { display: grid; gap: 4px; font-size: 13px; color: var(--muted); min-width: 0; }
 .inp { position: relative; display: flex; align-items: center; }
-.inp input, .inp select {
+.inp input, .inp select, .unit input {
   width: 100%; font: 500 15px/1.2 var(--mono); color: var(--ink); background: var(--field);
   border: 1px solid var(--line); border-radius: 7px; padding: 9px 44px 9px 10px; font-variant-numeric: tabular-nums;
 }
 .inp select { padding-right: 10px; font-family: var(--body); }
+.inp input.txt, .unit input.txt { font-family: var(--body); font-variant-numeric: normal; padding-right: 10px; }
 .inp .u { position: absolute; right: 10px; font-size: 12px; color: var(--muted); pointer-events: none; }
-input:focus-visible, select:focus-visible, button:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
 .check { display: flex; gap: 8px; align-items: center; color: var(--ink); font-size: 14px; }
 .check input { width: 18px; height: 18px; accent-color: var(--accent); }
 .hint { font-size: 12px; color: var(--muted); margin: 0; }
 
+/* Lejemål */
+.units { display: grid; gap: 8px; }
+.unit, .unit-head { display: grid; grid-template-columns: minmax(0, 1.3fr) minmax(0, .7fr) minmax(0, 1fr) 34px; gap: 8px; align-items: center; }
+.unit-head { font-size: 12px; color: var(--muted); }
+.unit input { padding-right: 10px; }
+.unit .x { width: 34px; height: 36px; border-radius: 7px; border: 1px solid var(--line); background: transparent; color: var(--muted); font-size: 18px; line-height: 1; cursor: pointer; }
+.unit .x:hover { color: var(--neg); border-color: var(--neg); }
+.unit .x:disabled { opacity: .35; cursor: not-allowed; }
+.units-foot { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; justify-content: space-between; }
+.units-sum { font: 500 13px/1.4 var(--mono); color: var(--ink); font-variant-numeric: tabular-nums; }
+
 .results { display: grid; gap: 16px; position: sticky; top: calc(env(safe-area-inset-top, 0px) + 12px); }
 @media (max-width: 880px) { .results { position: static; } }
 .card { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 18px; display: grid; gap: 14px; min-width: 0; }
-.hero { border-color: var(--accent); }
-.hero .lbl { font-size: 13px; color: var(--muted); }
+.hero-card { border-color: var(--accent); }
+.hero-card .lbl { font-size: 13px; color: var(--muted); }
 .big { font: 600 clamp(30px, 5vw, 44px)/1 var(--mono); font-variant-numeric: tabular-nums; letter-spacing: -.02em; }
 .big small { font-size: 15px; font-weight: 500; color: var(--muted); margin-left: 6px; letter-spacing: 0; }
 .pill { display: inline-block; font-size: 12px; font-weight: 600; padding: 3px 9px; border-radius: 99px; background: var(--accent-soft); color: var(--accent); }
 .pos { color: var(--pos); } .neg { color: var(--neg); }
 .kpis { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; }
 @media (max-width: 560px) { .kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
-.kpi { display: grid; gap: 2px; border-top: 1px solid var(--line); padding-top: 10px; }
+.kpi { display: grid; gap: 2px; border-top: 1px solid var(--line); padding-top: 10px; align-content: start; }
 .kpi span { font-size: 12px; color: var(--muted); }
 .kpi b { font: 600 18px/1.2 var(--mono); font-variant-numeric: tabular-nums; }
-h2 { font-size: 15px; margin: 0; font-weight: 700; }
+.card h2 { font-size: 15px; margin: 0; font-weight: 700; }
 table { width: 100%; border-collapse: collapse; font-variant-numeric: tabular-nums; }
 td, th { padding: 6px 0; border-bottom: 1px solid var(--line); text-align: right; font-size: 14px; }
 td:first-child, th:first-child { text-align: left; color: var(--muted); font-weight: 400; }
@@ -96,150 +171,276 @@ td.v { font-family: var(--mono); }
 .sens td { font-family: var(--mono); font-size: 13px; }
 .sens td.base { background: var(--accent-soft); }
 svg text { fill: var(--muted); font: 11px var(--mono); }
-.note { font-size: 13px; color: var(--muted); display: grid; gap: 6px; }
-.note p { margin: 0; }
-.pro { background: var(--accent-soft); border-color: transparent; }
-.pro ul { margin: 0; padding-left: 18px; display: grid; gap: 4px; }
-a { color: var(--accent); }
-footer { color: var(--muted); font-size: 12px; max-width: 80ch; display: grid; gap: 4px; }
-.cta { display: inline-block; justify-self: start; background: var(--accent); color: var(--panel); font-weight: 700; text-decoration: none; padding: 11px 18px; border-radius: 8px; }
-.cta:hover { filter: brightness(1.08); }
-.inp input.txt { font-family: var(--body); padding-right: 10px; }
 .export-head { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; justify-content: space-between; }
 .btns { display: flex; flex-wrap: wrap; gap: 10px; }
-.btn { font: 600 14px/1 var(--body); padding: 11px 16px; border-radius: 8px; border: 1px solid var(--accent); background: var(--accent); color: var(--panel); cursor: pointer; }
-.btn.ghost { background: transparent; color: var(--accent); }
-.btn:disabled { opacity: .6; cursor: progress; }
+.note { font-size: 13px; color: var(--muted); }
+.note p { margin: 0; }
+
+/* Sådan virker det */
+.steps { padding-block: 40px; }
+.step-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
+@media (max-width: 760px) { .step-grid { grid-template-columns: minmax(0, 1fr); } }
+.step { display: grid; gap: 6px; align-content: start; padding: 20px; background: var(--panel); border: 1px solid var(--line); border-radius: 10px; }
+.step .n { font: 600 13px/1 var(--mono); color: var(--accent); }
+.step h3 { font-size: 17px; margin: 0; }
+.step p { margin: 0; color: var(--muted); font-size: 14px; }
+
+/* Pro */
+.pro { background: var(--hero); border-block: 1px solid var(--line); padding-block: 44px; }
+.pro-grid { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, .8fr); gap: 32px; align-items: center; }
+@media (max-width: 820px) { .pro-grid { grid-template-columns: minmax(0, 1fr); } }
+.pro h2 { font-size: clamp(24px, 3vw, 32px); margin: 8px 0 12px; line-height: 1.12; letter-spacing: -.015em; }
+.pro ul { margin: 0; padding-left: 20px; display: grid; gap: 6px; }
+.signup { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 22px; display: grid; gap: 12px; }
+.signup b { font-size: 17px; }
+.signup p { margin: 0; color: var(--muted); font-size: 14px; }
+
+/* Spørgsmål og svar */
+.faq { padding-block: 44px; }
+.faq-list { display: grid; gap: 10px; max-width: 78ch; }
+details { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 14px 18px; }
+summary { cursor: pointer; font-weight: 600; font-size: 15px; }
+details p { margin: 10px 0 0; color: var(--muted); }
+
+footer.site-foot { border-top: 1px solid var(--line); padding-block: 26px 40px; color: var(--muted); font-size: 13px; }
+.foot { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 12px 24px; }
+.foot p { margin: 0; max-width: 70ch; }
+@media (prefers-reduced-motion: no-preference) { .btn, .kat button { transition: background .15s, border-color .15s, filter .15s; } }
 </style>
 </head>
 <body>
 
-<div class="wrap">
-  <header>
-    <div class="eyebrow">Til private udlejere i Danmark</div>
-    <h1>Kan det betale sig at købe og udleje?</h1>
-    <p>Regn på en konkret bolig: husleje, fællesudgifter, realkreditlån og skat. Tallene herunder er et eksempel på en 75 m² ejerlejlighed i Aarhus. Ret dem til din egen bolig.</p>
-  </header>
+<header class="topbar">
+  <div class="wrap bar">
+    <a class="brand" href="#top" aria-label="Udlejningsberegneren, til toppen">
+      <svg width="28" height="28" viewBox="0 0 28 28" aria-hidden="true"><rect width="28" height="28" rx="7" fill="var(--accent)"/><path d="M7 13.5 14 8l7 5.5V21H7z" fill="none" stroke="var(--accent-ink)" stroke-width="1.8" stroke-linejoin="round"/><path d="M11 21v-4h6v4" fill="none" stroke="var(--accent-ink)" stroke-width="1.8"/></svg>
+      Udlejningsberegneren <small>.dk</small>
+    </a>
+    <nav class="nav" aria-label="Hovedmenu">
+      <a href="#beregner">Beregner</a>
+      <a href="#rapport">Rapport til banken</a>
+      <a href="#faq">Spørgsmål</a>
+      <a class="btn small" href="#pro">Skriv dig op</a>
+    </nav>
+  </div>
+</header>
 
-  <div class="grid">
-    <form class="inputs" id="f" autocomplete="off">
-      <fieldset>
-        <legend>Boligen</legend>
-        <label for="adresse">Adresse eller navn på boligen<span class="inp"><input id="adresse" class="txt" placeholder="F.eks. Vestergade 12, 2. tv., 8000 Aarhus C"></span></label>
-        <div class="row">
+<section class="hero" id="top">
+  <div class="wrap hero-grid">
+    <div>
+      <div class="eyebrow">For private udlejere og investorer</div>
+      <h1>Regn på udlejningsboligen, før du byder</h1>
+      <p class="lede">Se cash flow, afkast og skat for en konkret dansk udlejningsbolig eller ejendom med op til 6 lejemål. Beregningen bruger dagens realkreditrenter og danske skatteregler, og du kan hente den som rapport til banken.</p>
+      <div class="cta-row">
+        <a class="btn" href="#beregner">Start beregningen</a>
+        <a class="btn ghost" href="#rapport">Se rapporten til banken</a>
+      </div>
+      <ul class="points">
+        <li>Gratis og uden login</li>
+        <li>Intet gemmes</li>
+        <li>PDF og Excel til banken</li>
+      </ul>
+    </div>
+    <aside class="board" aria-label="Aktuelle realkreditrenter">
+      <div class="board-head"><b>Renter i beregningen</b><span id="rateDate"></span></div>
+      <div class="rate"><span>Fast rente, 30 år</span><b id="rateFast">–</b></div>
+      <div class="rate"><span>Variabel rente, 3M CIBOR</span><b id="rateVar">–</b></div>
+      <div class="rate"><span>Bidragssats, standard</span><b>1,00 %</b></div>
+      <p class="src">Kilde: Nykredits markedsrenter. Fast rente er den effektive rente på et 30-årigt 4 %-lån.</p>
+    </aside>
+  </div>
+</section>
+
+<section class="calc" id="beregner">
+  <div class="wrap">
+    <div class="section-head">
+      <div class="eyebrow">Beregner</div>
+      <h2>Hvilken type ejendom regner du på?</h2>
+    </div>
+    <div class="kat" role="radiogroup" aria-label="Type ejendom">
+      <button type="button" role="radio" aria-checked="true" data-kat="en">
+        <svg width="30" height="30" viewBox="0 0 30 30" aria-hidden="true"><path d="M6 14 15 7l9 7v10H6z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M12 24v-6h6v6" fill="none" stroke="currentColor" stroke-width="1.8"/></svg>
+        <b>Udlejningsejendom med 1 lejemål</b>
+        <span>Ejerlejlighed, rækkehus eller hus</span>
+      </button>
+      <button type="button" role="radio" aria-checked="false" data-kat="flere">
+        <svg width="30" height="30" viewBox="0 0 30 30" aria-hidden="true"><rect x="7" y="5" width="16" height="20" rx="1.5" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M11 10h2M17 10h2M11 15h2M17 15h2M13 25v-4h4v4" fill="none" stroke="currentColor" stroke-width="1.8"/></svg>
+        <b>Udlejningsejendom med flere lejemål</b>
+        <span>Ejendom med 2 til 6 lejemål</span>
+      </button>
+    </div>
+    <p class="exnote" id="exNote"></p>
+
+    <div class="grid">
+      <form class="inputs" id="f" autocomplete="off">
+        <fieldset>
+          <legend>Ejendommen</legend>
+          <label for="adresse">Adresse eller navn på ejendommen<span class="inp"><input id="adresse" class="txt" placeholder="F.eks. Vestergade 12, 8000 Aarhus C"></span></label>
           <label for="pris">Købspris<span class="inp"><input id="pris" inputmode="numeric" value="2.400.000"><span class="u">kr</span></span></label>
-          <label for="leje">Husleje<span class="inp"><input id="leje" inputmode="numeric" value="10.500"><span class="u">kr/md</span></span></label>
-        </div>
-        <div class="row">
-          <label for="tomgang">Tomgang<span class="inp"><input id="tomgang" inputmode="decimal" value="4"><span class="u">%</span></span></label>
-          <label for="vaerdi">Værdistigning<span class="inp"><input id="vaerdi" inputmode="decimal" value="2"><span class="u">%/år</span></span></label>
-        </div>
-        <label for="omk">Advokat, rådgivning og andre købsomkostninger<span class="inp"><input id="omk" inputmode="numeric" value="15.000"><span class="u">kr</span></span></label>
-        <p class="hint">Tinglysning af skødet (1.850 kr + 0,6 % af købesummen) lægges automatisk til.</p>
-      </fieldset>
+          <div class="row" data-only="en">
+            <label for="areal">Boligareal<span class="inp"><input id="areal" inputmode="numeric" value="75"><span class="u">m²</span></span></label>
+            <label for="leje">Husleje<span class="inp"><input id="leje" inputmode="numeric" value="10.500"><span class="u">kr/md</span></span></label>
+          </div>
+          <div class="units" data-only="flere" hidden>
+            <div class="unit-head"><span>Lejemål</span><span>Areal, m²</span><span>Leje, kr/md</span><span></span></div>
+            <div id="unitRows" class="units"></div>
+            <div class="units-foot">
+              <button type="button" class="btn ghost small" id="addUnit">Tilføj lejemål</button>
+              <span class="units-sum" id="unitsSum"></span>
+            </div>
+          </div>
+          <div class="row">
+            <label for="tomgang">Tomgang<span class="inp"><input id="tomgang" inputmode="decimal" value="4"><span class="u">%</span></span></label>
+            <label for="vaerdi">Værdistigning<span class="inp"><input id="vaerdi" inputmode="decimal" value="2"><span class="u">%/år</span></span></label>
+          </div>
+          <label for="omk">Advokat, rådgivning og andre købsomkostninger<span class="inp"><input id="omk" inputmode="numeric" value="15.000"><span class="u">kr</span></span></label>
+          <p class="hint">Tinglysning af skødet (1.850 kr + 0,6 % af købesummen) lægges automatisk til.</p>
+        </fieldset>
 
-      <fieldset>
-        <legend>Finansiering</legend>
-        <div class="row">
-          <label for="belaan">Realkreditlån<span class="inp"><input id="belaan" inputmode="decimal" value="80"><span class="u">%</span></span></label>
-          <label for="loebetid">Løbetid<span class="inp"><input id="loebetid" inputmode="numeric" value="30"><span class="u">år</span></span></label>
-        </div>
-        <label for="rentetype">Rentetype<span class="inp"><select id="rentetype"><option value="fast">Fast rente, 30 år</option><option value="variabel">Variabel rente (3M CIBOR)</option></select></span></label>
-        <div class="row">
-          <label for="rente">Rente<span class="inp"><input id="rente" inputmode="decimal" value="4,46"><span class="u">%</span></span></label>
-          <label for="bidrag">Bidragssats<span class="inp"><input id="bidrag" inputmode="decimal" value="1,00"><span class="u">%</span></span></label>
-        </div>
-        <p class="hint" id="renteKilde"></p>
-        <label for="laanomk">Låneomkostninger (pant, kurtage, kursfradrag)<span class="inp"><input id="laanomk" inputmode="decimal" value="1,5"><span class="u">% af lån</span></span></label>
-        <label class="check" for="afdragsfri"><input type="checkbox" id="afdragsfri"> Afdragsfrit de første 10 år</label>
-        <p class="hint">Til udlejningsboliger kan man typisk låne op til 80 % i realkredit. Resten er udbetaling.</p>
-      </fieldset>
+        <fieldset>
+          <legend>Finansiering</legend>
+          <div class="row">
+            <label for="belaan">Realkreditlån<span class="inp"><input id="belaan" inputmode="decimal" value="80"><span class="u">%</span></span></label>
+            <label for="loebetid">Løbetid<span class="inp"><input id="loebetid" inputmode="numeric" value="30"><span class="u">år</span></span></label>
+          </div>
+          <label for="rentetype">Rentetype<span class="inp"><select id="rentetype"><option value="fast">Fast rente, 30 år</option><option value="variabel">Variabel rente (3M CIBOR)</option></select></span></label>
+          <div class="row">
+            <label for="rente">Rente<span class="inp"><input id="rente" inputmode="decimal" value="4,46"><span class="u">%</span></span></label>
+            <label for="bidrag">Bidragssats<span class="inp"><input id="bidrag" inputmode="decimal" value="1,00"><span class="u">%</span></span></label>
+          </div>
+          <p class="hint" id="renteKilde"></p>
+          <label for="laanomk">Låneomkostninger (pant, kurtage, kursfradrag)<span class="inp"><input id="laanomk" inputmode="decimal" value="1,5"><span class="u">% af lån</span></span></label>
+          <label class="check" for="afdragsfri"><input type="checkbox" id="afdragsfri"> Afdragsfrit de første 10 år</label>
+          <p class="hint">Til udlejningsejendomme kan man typisk låne op til 80 % i realkredit. Resten er udbetaling.</p>
+        </fieldset>
 
-      <fieldset>
-        <legend>Drift</legend>
-        <div class="row">
-          <label for="faelles">Fællesudgifter<span class="inp"><input id="faelles" inputmode="numeric" value="2.000"><span class="u">kr/md</span></span></label>
-          <label for="grundskyld">Grundskyld<span class="inp"><input id="grundskyld" inputmode="numeric" value="6.000"><span class="u">kr/år</span></span></label>
-        </div>
-        <div class="row">
-          <label for="forsikring">Forsikring<span class="inp"><input id="forsikring" inputmode="numeric" value="1.500"><span class="u">kr/år</span></span></label>
-          <label for="vedl">Vedligehold<span class="inp"><input id="vedl" inputmode="decimal" value="5"><span class="u">% af leje</span></span></label>
-        </div>
-        <label for="adm">Administration<span class="inp"><input id="adm" inputmode="decimal" value="0"><span class="u">% af leje</span></span></label>
-      </fieldset>
+        <fieldset>
+          <legend>Drift</legend>
+          <div class="row">
+            <label for="faelles" data-only="en">Fællesudgifter<span class="inp"><input id="faelles" inputmode="numeric" value="2.000"><span class="u">kr/md</span></span></label>
+            <label for="oevrige" data-only="flere" hidden>Øvrige driftsudgifter<span class="inp"><input id="oevrige" inputmode="numeric" value="0"><span class="u">kr/år</span></span></label>
+            <label for="grundskyld">Grundskyld<span class="inp"><input id="grundskyld" inputmode="numeric" value="6.000"><span class="u">kr/år</span></span></label>
+          </div>
+          <p class="hint" data-only="flere" hidden>Øvrige driftsudgifter er f.eks. renovation, el og vand i fællesarealer, snerydning og revision.</p>
+          <div class="row">
+            <label for="forsikring">Forsikring<span class="inp"><input id="forsikring" inputmode="numeric" value="1.500"><span class="u">kr/år</span></span></label>
+            <label for="vedl">Vedligehold<span class="inp"><input id="vedl" inputmode="decimal" value="5"><span class="u">% af leje</span></span></label>
+          </div>
+          <label for="adm">Administration<span class="inp"><input id="adm" inputmode="decimal" value="0"><span class="u">% af leje</span></span></label>
+        </fieldset>
 
-      <fieldset>
-        <legend>Skat (forenklet)</legend>
-        <div class="row">
-          <label for="marg">Skat af overskud<span class="inp"><input id="marg" inputmode="decimal" value="40"><span class="u">%</span></span></label>
-          <label for="fradrag">Værdi af rentefradrag<span class="inp"><input id="fradrag" inputmode="decimal" value="33"><span class="u">%</span></span></label>
-        </div>
-        <label class="check" for="par"><input type="checkbox" id="par"> Gift eller registreret partner (fradragsgrænse 100.000 kr)</label>
-        <p class="hint">Beregnet som privat udlejning uden virksomhedsordning: overskuddet af lejen beskattes som personlig indkomst, og renter og bidrag trækkes fra i kapitalindkomsten. Fradraget er ca. 33 % op til 50.000 kr (100.000 kr for ægtepar) og ca. 8 point lavere over grænsen. Beregningen antager, at du ikke har andre renteudgifter. Udlejer du hele boligen hele året, betaler du som udgangspunkt ikke ejendomsværdiskat.</p>
-      </fieldset>
-    </form>
+        <fieldset>
+          <legend>Skat (forenklet)</legend>
+          <div class="row">
+            <label for="marg">Skat af overskud<span class="inp"><input id="marg" inputmode="decimal" value="40"><span class="u">%</span></span></label>
+            <label for="fradrag">Værdi af rentefradrag<span class="inp"><input id="fradrag" inputmode="decimal" value="33"><span class="u">%</span></span></label>
+          </div>
+          <label class="check" for="par"><input type="checkbox" id="par"> Gift eller registreret partner (fradragsgrænse 100.000 kr)</label>
+          <p class="hint">Beregnet som privat udlejning uden virksomhedsordning: overskuddet af lejen beskattes som personlig indkomst, og renter og bidrag trækkes fra i kapitalindkomsten. Fradraget er ca. 33 % op til 50.000 kr (100.000 kr for ægtepar) og ca. 8 point lavere over grænsen. Beregningen antager, at du ikke har andre renteudgifter og ikke selv bor i ejendommen.</p>
+        </fieldset>
+      </form>
 
-    <div class="results" aria-live="polite">
-      <section class="card hero">
-        <div class="lbl">Cash flow efter skat, første år</div>
-        <div class="big" id="cfMd">–</div>
-        <div><span class="pill" id="cfNote">–</span></div>
-        <div class="kpis">
-          <div class="kpi"><span>Bruttoafkast</span><b id="kBrutto">–</b></div>
-          <div class="kpi"><span>Nettoafkast</span><b id="kNetto">–</b></div>
-          <div class="kpi"><span>Egenkapital</span><b id="kEk">–</b></div>
-          <div class="kpi"><span>Forrentning af egenkapital</span><b id="kRoe">–</b></div>
-        </div>
-      </section>
+      <div class="results" aria-live="polite">
+        <section class="card hero-card">
+          <div class="lbl">Cash flow efter skat, første år</div>
+          <div class="big" id="cfMd">–</div>
+          <div><span class="pill" id="cfNote">–</span></div>
+          <div class="kpis">
+            <div class="kpi"><span>Bruttoafkast</span><b id="kBrutto">–</b></div>
+            <div class="kpi"><span>Nettoafkast</span><b id="kNetto">–</b></div>
+            <div class="kpi"><span>Egenkapital</span><b id="kEk">–</b></div>
+            <div class="kpi"><span>Forrentning af egenkapital</span><b id="kRoe">–</b></div>
+          </div>
+        </section>
 
-      <section class="card" id="export">
-        <div class="export-head"><h2>Rapport til banken</h2><span class="pill">Pro · gratis i testperioden</span></div>
-        <p class="hint">Hent beregningen som PDF-rapport eller Excel-fil med forudsætninger, første år, rentefølsomhed og 10 års fremskrivning. Skriv adressen øverst, så kommer den med i rapporten.</p>
-        <div class="btns"><button type="button" class="btn" id="btnPdf">Hent PDF</button><button type="button" class="btn ghost" id="btnXlsx">Hent Excel</button></div>
-        <p class="hint" id="exportStatus" role="status"></p>
-      </section>
+        <section class="card" id="rapport">
+          <div class="export-head"><h2>Rapport til banken</h2><span class="pill">Pro · gratis i testperioden</span></div>
+          <p class="hint">Hent beregningen som PDF-rapport eller Excel-fil med forudsætninger, lejemål, første år, rentefølsomhed og 10 års fremskrivning. Skriv adressen øverst, så kommer den med i rapporten.</p>
+          <div class="btns"><button type="button" class="btn" id="btnPdf">Hent PDF</button><button type="button" class="btn ghost" id="btnXlsx">Hent Excel</button></div>
+          <p class="hint" id="exportStatus" role="status"></p>
+        </section>
 
-      <section class="card">
-        <h2>Første år</h2>
-        <table>
-          <tbody id="yr1"></tbody>
-        </table>
-      </section>
+        <section class="card">
+          <h2>Første år</h2>
+          <table><tbody id="yr1"></tbody></table>
+        </section>
 
-      <section class="card">
-        <h2>Hvad sker der, hvis renten stiger?</h2>
-        <p class="hint">Cash flow efter skat pr. måned ved forskellige renter og tomgang. Det fremhævede felt er dine tal.</p>
-        <div class="tbl-scroll"><table class="sens" id="sens"></table></div>
-      </section>
+        <section class="card">
+          <h2>Hvad sker der, hvis renten stiger?</h2>
+          <p class="hint">Cash flow efter skat pr. måned ved forskellige renter og tomgang. Det fremhævede felt er dine tal.</p>
+          <div class="tbl-scroll"><table class="sens" id="sens"></table></div>
+        </section>
 
-      <section class="card">
-        <h2>Din friværdi i boligen over 10 år</h2>
-        <div id="chart"></div>
-        <p class="hint" id="chartNote"></p>
-      </section>
+        <section class="card">
+          <h2>Din friværdi i ejendommen over 10 år</h2>
+          <div id="chart"></div>
+          <p class="hint" id="chartNote"></p>
+        </section>
 
-      <section class="card pro" id="pro">
-        <h2>Pro-versionen er på vej</h2>
-        <ul>
-          <li>Sammenlign privat udlejning, virksomhedsordningen og selskab</li>
-          <li>Tjek om lejen er lovlig: fri leje, det lejedes værdi eller omkostningsbestemt leje</li>
-          <li>Hent BBR-data og offentlig vurdering ud fra adressen</li>
-          <li>Gem dine boliger, så du kan sammenligne dem og vende tilbage senere</li>
-        </ul>
-        <a class="cta" href="https://tally.so/r/1WA1dp" target="_blank" rel="noopener">Skriv mig op til Pro-versionen</a>
-        <p class="hint">Det er gratis. Vi skriver kun til dig, når Pro-versionen er klar. Læs <a href="privatlivspolitik.html">privatlivspolitikken</a>.</p>
-      </section>
-
-      <section class="card note">
-        <p>Beregningen er vejledende og er ikke skatte- eller investeringsrådgivning. Lejen skal overholde lejeloven, og reglerne afhænger af byggeår og kommune. Se <a href="https://www.lovguiden.dk/praksisoversigt/lejefastsaettelse" target="_blank" rel="noopener">Lovguiden om lejefastsættelse</a>.</p>
-      </section>
+        <section class="card note">
+          <p>Beregningen er vejledende og er ikke skatte- eller investeringsrådgivning. Lejen skal overholde lejeloven, og reglerne afhænger af byggeår og kommune. Se <a href="https://www.lovguiden.dk/praksisoversigt/lejefastsaettelse" target="_blank" rel="noopener">Lovguiden om lejefastsættelse</a>.</p>
+        </section>
+      </div>
     </div>
   </div>
-  <footer>
-    <span>udlejningsberegner.dk · Kontakt: KONTAKT_EMAIL · <a href="privatlivspolitik.html">Privatlivspolitik</a></span>
-    <span>Eksempeltallene er illustrative og ikke en aktuel markedsvurdering. Renter er Nykredits markedsrenter fra 22. oktober 2026. Bidragssatsen er sat til 1 % som standard, så tjek dit eget lånetilbud.</span>
-  </footer>
-</div>
+</section>
+
+<section class="steps">
+  <div class="wrap">
+    <div class="section-head">
+      <div class="eyebrow">Sådan bruger du den</div>
+      <h2>Fra boligannonce til rapport på få minutter</h2>
+    </div>
+    <div class="step-grid">
+      <div class="step"><span class="n">1</span><h3>Vælg type og indtast tallene</h3><p>Købspris, husleje for hvert lejemål, drift og finansiering. Renten er udfyldt med dagens realkreditrente.</p></div>
+      <div class="step"><span class="n">2</span><h3>Se om det kan betale sig</h3><p>Cash flow før og efter skat, afkast, forrentning af egenkapitalen og hvad en rentestigning betyder.</p></div>
+      <div class="step"><span class="n">3</span><h3>Send rapporten til banken</h3><p>Hent en PDF-rapport og en Excel-fil med alle forudsætninger og en fremskrivning over 10 år.</p></div>
+    </div>
+  </div>
+</section>
+
+<section class="pro" id="pro">
+  <div class="wrap pro-grid">
+    <div>
+      <div class="eyebrow">Pro-versionen er på vej</div>
+      <h2>Mere til dig, der vil regne grundigt</h2>
+      <ul>
+        <li>Sammenlign privat udlejning, virksomhedsordningen og selskab</li>
+        <li>Tjek om lejen er lovlig: fri leje, det lejedes værdi eller omkostningsbestemt leje</li>
+        <li>Hent BBR-data og offentlig vurdering ud fra adressen</li>
+        <li>Gem dine ejendomme, så du kan sammenligne dem og vende tilbage senere</li>
+      </ul>
+    </div>
+    <div class="signup">
+      <b>Bliv skrevet op</b>
+      <p>Det er gratis. Vi skriver kun til dig, når Pro-versionen er klar.</p>
+      <a class="btn" href="https://tally.so/r/1WA1dp" target="_blank" rel="noopener">Skriv mig op til Pro-versionen</a>
+    </div>
+  </div>
+</section>
+
+<section class="faq" id="faq">
+  <div class="wrap">
+    <div class="section-head">
+      <div class="eyebrow">Spørgsmål og svar</div>
+      <h2>Godt at vide</h2>
+    </div>
+    <div class="faq-list">
+      <details><summary>Er beregneren gratis?</summary><p>Ja. Beregneren og rapporten til banken er gratis i testperioden. Pro-versionen kommer senere, og du kan skrive dig op til den.</p></details>
+      <details><summary>Hvor kommer renterne fra?</summary><p>Den faste rente er Nykredits effektive rente på et 30-årigt 4 %-lån, og den variable rente er 3M CIBOR. Bidragssatsen er sat til 1 %. Du kan selv rette alle tal, så de passer til dit lånetilbud.</p></details>
+      <details><summary>Hvordan beregnes skatten?</summary><p>Som privat udlejning uden virksomhedsordning. Overskuddet af lejen beskattes som personlig indkomst, og renter og bidrag trækkes fra i kapitalindkomsten. Virksomhedsordningen og selskab kommer i Pro-versionen.</p></details>
+      <details><summary>Gemmer I mine tal?</summary><p>Nej. Alt regnes i din browser, også PDF- og Excel-rapporterne. Intet sendes til os.</p></details>
+      <details><summary>Kan jeg bruge den til en ejendom med flere lejemål?</summary><p>Ja. Vælg "Udlejningsejendom med flere lejemål", og indtast areal og leje for op til 6 lejemål.</p></details>
+    </div>
+  </div>
+</section>
+
+<footer class="site-foot">
+  <div class="wrap foot">
+    <p>Udlejningsberegneren er et vejledende værktøj og ikke skatte- eller investeringsrådgivning. Eksempeltallene er illustrative.</p>
+    <p>Kontakt: <a href="mailto:kontakt@udlejningsberegner.dk">kontakt@udlejningsberegner.dk</a> · <a href="privatlivspolitik.html">Privatlivspolitik</a></p>
+  </div>
+</footer>
 
 <script>
 (function () {
@@ -254,7 +455,51 @@ footer { color: var(--muted); font-size: 12px; max-width: 80ch; display: grid; g
   };
 
   // Markedsrenter fra Nykredits renteprognose (opdateret 22. oktober 2026).
-  const RENTER = { fast: 4.46, variabel: 2.59 };
+  const RENTER = { fast: 4.46, variabel: 2.59, dato: "22. oktober 2026" };
+  const MAX_UNITS = 6;
+
+  // Hver ejendomstype har sit eget eksempel og husker sine egne tal, når man skifter.
+  const KAT_FIELDS = ["adresse", "pris", "areal", "leje", "tomgang", "vaerdi", "omk", "faelles", "oevrige", "grundskyld", "forsikring", "vedl", "adm"];
+  const state = {
+    kat: "en",
+    en: { adresse: "", pris: "2.400.000", areal: "75", leje: "10.500", tomgang: "4", vaerdi: "2", omk: "15.000",
+          faelles: "2.000", oevrige: "0", grundskyld: "6.000", forsikring: "1.500", vedl: "5", adm: "0" },
+    flere: { adresse: "", pris: "6.500.000", areal: "", leje: "", tomgang: "4", vaerdi: "2", omk: "35.000",
+             faelles: "0", oevrige: "18.000", grundskyld: "22.000", forsikring: "14.000", vedl: "8", adm: "0",
+             units: [
+               { navn: "St. tv.", m2: "68", leje: "8.200" }, { navn: "St. th.", m2: "72", leje: "8.600" },
+               { navn: "1. tv.", m2: "68", leje: "8.400" }, { navn: "1. th.", m2: "72", leje: "8.800" }
+             ] }
+  };
+  const EXNOTE = {
+    en: "Tallene er et eksempel på en 75 m² ejerlejlighed i Aarhus. Ret dem til din egen bolig.",
+    flere: "Tallene er et eksempel på en ejendom i Odense med fire lejligheder. Ret dem og lejemålene til din egen ejendom."
+  };
+  const parse = v => { const n = parseFloat(String(v).replace(/\s|kr|%/g, "").replace(/\./g, "").replace(",", ".")); return isFinite(n) ? n : 0; };
+
+  function renderUnits() {
+    const units = state.flere.units;
+    $("unitRows").innerHTML = units.map((u, i) => `
+      <div class="unit" data-i="${i}">
+        <input class="txt" data-k="navn" aria-label="Lejemål ${i + 1}, betegnelse" value="${u.navn.replace(/"/g, "&quot;")}">
+        <input data-k="m2" inputmode="numeric" aria-label="Lejemål ${i + 1}, areal i m²" value="${u.m2}">
+        <input data-k="leje" inputmode="numeric" aria-label="Lejemål ${i + 1}, leje pr. måned" value="${u.leje}">
+        <button type="button" class="x" aria-label="Fjern lejemål ${i + 1}"${units.length <= 2 ? " disabled" : ""}>×</button>
+      </div>`).join("");
+    $("addUnit").disabled = units.length >= MAX_UNITS;
+    $("addUnit").textContent = units.length >= MAX_UNITS ? "Højst 6 lejemål" : "Tilføj lejemål";
+  }
+
+  function setKat(kat) {
+    KAT_FIELDS.forEach(id => { state[state.kat][id] = $(id).value; });
+    state.kat = kat;
+    KAT_FIELDS.forEach(id => { $(id).value = state[kat][id]; });
+    document.querySelectorAll(".kat button").forEach(b => b.setAttribute("aria-checked", String(b.dataset.kat === kat)));
+    document.querySelectorAll("[data-only]").forEach(el => { el.hidden = el.dataset.only !== kat; });
+    $("exNote").textContent = EXNOTE[kat];
+    if (kat === "flere") renderUnits();
+    render();
+  }
   const dec = (v, d) => v.toLocaleString("da-DK", { minimumFractionDigits: d, maximumFractionDigits: d });
 
   // Biblioteker til eksport hentes først, når nogen klikker på en knap.
@@ -305,7 +550,7 @@ footer { color: var(--muted); font-size: 12px; max-width: 80ch; display: grid; g
     for (let y = 1; y <= 10; y++) {
       const infl = Math.pow(1.02, y - 1);
       const effLeje = leje * infl * (1 - o.tomgang / 100);
-      const drift = (o.faelles * 12 + o.grundskyld + o.forsikring) * infl + effLeje * (o.vedl + o.adm) / 100;
+      const drift = (o.faelles * 12 + o.oevrige + o.grundskyld + o.forsikring) * infl + effLeje * (o.vedl + o.adm) / 100;
       const noi = effLeje - drift;
       const l = loanYear(state, o.rente / 100 / 12, o.bidrag / 100 / 12, totalMonths, ioMonths);
       const cfFoer = noi - l.renter - l.bidrag - l.afdrag;
@@ -326,11 +571,17 @@ footer { color: var(--muted); font-size: 12px; max-width: 80ch; display: grid; g
   }
 
   function read() {
+    const flere = state.kat === "flere";
+    const units = flere ? state.flere.units.map(u => ({ navn: u.navn.trim() || "Lejemål", m2: parse(u.m2), leje: parse(u.leje) })) : [];
     return {
-      pris: num("pris"), leje: num("leje"), tomgang: num("tomgang"), vaerdi: num("vaerdi"), omk: num("omk"),
+      kat: state.kat, units,
+      pris: num("pris"),
+      leje: flere ? units.reduce((s, u) => s + u.leje, 0) : num("leje"),
+      areal: flere ? units.reduce((s, u) => s + u.m2, 0) : num("areal"),
+      faelles: flere ? 0 : num("faelles"), oevrige: flere ? num("oevrige") : 0, tomgang: num("tomgang"), vaerdi: num("vaerdi"), omk: num("omk"),
       belaan: num("belaan"), loebetid: num("loebetid"), rente: num("rente"), bidrag: num("bidrag"), laanomk: num("laanomk"),
       afdragsfri: $("afdragsfri").checked, par: $("par").checked,
-      faelles: num("faelles"), grundskyld: num("grundskyld"), forsikring: num("forsikring"), vedl: num("vedl"), adm: num("adm"),
+      grundskyld: num("grundskyld"), forsikring: num("forsikring"), vedl: num("vedl"), adm: num("adm"),
       marg: num("marg"), fradrag: num("fradrag")
     };
   }
@@ -361,6 +612,10 @@ footer { color: var(--muted); font-size: 12px; max-width: 80ch; display: grid; g
 
   function render() {
     const o = read();
+    if (o.kat === "flere") {
+      $("unitsSum").textContent = `${o.units.length} lejemål · ${fmt.format(o.areal)} m² · ${kr(o.leje)}/md` +
+        (o.areal > 0 ? ` · ${fmt.format(Math.round(o.leje * 12 / o.areal))} kr/m²/år` : "");
+    }
     if (o.pris <= 0) return;
     const r = model(o), y = r.y1;
     const md = y.cfEfter / 12;
@@ -394,6 +649,12 @@ footer { color: var(--muted); font-size: 12px; max-width: 80ch; display: grid; g
     drawChart(r, o);
   }
 
+  function fillRates() {
+    $("rateFast").textContent = dec(RENTER.fast, 2) + " %";
+    $("rateVar").textContent = dec(RENTER.variabel, 2) + " %";
+    $("rateDate").textContent = "Opdateret " + RENTER.dato;
+  }
+
   function drawChart(r, o) {
     const W = 520, H = 210, padL = 52, padB = 24, padT = 12, padR = 8;
     const data = [{ y: 0, v: r.ek }, ...r.years.map(y => ({ y: y.y, v: y.frivaerdi }))];
@@ -420,7 +681,7 @@ footer { color: var(--muted); font-size: 12px; max-width: 80ch; display: grid; g
     $("chart").innerHTML = s;
     const end = r.years[9];
     $("chartNote").textContent =
-      `Du lægger ${kr(r.ek)} i boligen. Efter 10 år er din friværdi ${kr(end.frivaerdi)} med ${pct(o.vaerdi)} årlig værdistigning, og du har samlet haft ${kr(cum[10])} i cash flow efter skat. Leje og udgifter stiger 2 % om året.`;
+      `Du lægger ${kr(r.ek)} i ejendommen. Efter 10 år er din friværdi ${kr(end.frivaerdi)} med ${pct(o.vaerdi)} årlig værdistigning, og du har samlet haft ${kr(cum[10])} i cash flow efter skat. Leje og udgifter stiger 2 % om året.`;
   }
 
   // ---------- Rapport til banken (PDF og Excel) ----------
@@ -456,6 +717,8 @@ footer { color: var(--muted); font-size: 12px; max-width: 80ch; display: grid; g
       case "pct": return pct(v);
       case "pct2": return dec(v, 2) + " %";
       case "aar": return fmt.format(v) + " år";
+      case "m2": return fmt.format(v) + " m²";
+      case "krm2": return fmt.format(Math.round(v)) + " kr/m²/år";
       default: return String(v);
     }
   }
@@ -464,9 +727,12 @@ footer { color: var(--muted); font-size: 12px; max-width: 80ch; display: grid; g
     const o = read(), r = model(o);
     const adresse = $("adresse").value.trim();
     const today = new Date();
+    const flere = o.kat === "flere";
     return {
-      o, r,
-      title: adresse || "Udlejningsbolig",
+      o, r, flere,
+      heading: flere ? "Investeringsberegning for udlejningsejendom" : "Investeringsberegning for udlejningsbolig",
+      subtitle: (adresse || (flere ? "Udlejningsejendom" : "Udlejningsbolig")) + " · " + (flere ? o.units.length + " lejemål" : "1 lejemål"),
+      units: o.units,
       adresse,
       dato: today.toLocaleDateString("da-DK", { day: "numeric", month: "long", year: "numeric" }),
       isoDato: today.toISOString().slice(0, 10),
@@ -478,8 +744,10 @@ footer { color: var(--muted); font-size: 12px; max-width: 80ch; display: grid; g
       ],
       inputs: [
         ["Bolig og drift", [
-          ["Købspris", o.pris, "kr"], ["Husleje", o.leje, "krmd"], ["Tomgang", o.tomgang, "pct"],
-          ["Værdistigning pr. år", o.vaerdi, "pct"], ["Fællesudgifter", o.faelles, "krmd"], ["Grundskyld", o.grundskyld, "kraar"],
+          ["Købspris", o.pris, "kr"], [flere ? "Samlet husleje" : "Husleje", o.leje, "krmd"],
+          ["Areal", o.areal, "m2"], ["Leje pr. m² pr. år", o.areal > 0 ? o.leje * 12 / o.areal : 0, "krm2"],
+          ["Tomgang", o.tomgang, "pct"], ["Værdistigning pr. år", o.vaerdi, "pct"],
+          flere ? ["Øvrige driftsudgifter", o.oevrige, "kraar"] : ["Fællesudgifter", o.faelles, "krmd"], ["Grundskyld", o.grundskyld, "kraar"],
           ["Forsikring", o.forsikring, "kraar"], ["Vedligehold, andel af leje", o.vedl, "pct"],
           ["Administration, andel af leje", o.adm, "pct"], ["Købsomkostninger i alt", r.kobsomk, "kr"]
         ]],
@@ -488,7 +756,8 @@ footer { color: var(--muted); font-size: 12px; max-width: 80ch; display: grid; g
           ["Rentetype", $("rentetype").selectedOptions[0].textContent, "txt"], ["Rente", o.rente, "pct2"],
           ["Bidragssats", o.bidrag, "pct2"], ["Løbetid", o.loebetid, "aar"],
           ["Afdragsfrihed", o.afdragsfri ? "De første 10 år" : "Nej", "txt"], ["Egenkapital inkl. omkostninger", r.ek, "kr"],
-          ["Skat af overskud", o.marg, "pct"], ["Værdi af rentefradrag", o.fradrag, "pct"]
+          ["Skat af overskud", o.marg, "pct"], ["Værdi af rentefradrag", o.fradrag, "pct"],
+          ["Ægtepar (fradragsgrænse 100.000 kr)", o.par ? "Ja" : "Nej", "txt"]
         ]]
       ],
       yr1: yearRows(r.y1),
@@ -499,7 +768,7 @@ footer { color: var(--muted); font-size: 12px; max-width: 80ch; display: grid; g
   }
 
   function fileName(d, ext) {
-    const navn = (d.adresse || "bolig").replace(/[\\/:*?"<>|]+/g, " ").replace(/\s+/g, " ").trim().slice(0, 60);
+    const navn = (d.adresse || (d.flere ? "ejendom" : "bolig")).replace(/[\\/:*?"<>|]+/g, " ").replace(/\s+/g, " ").trim().slice(0, 60);
     return `Udlejningsberegning - ${navn} - ${d.isoDato}.${ext}`;
   }
 
@@ -515,9 +784,9 @@ footer { color: var(--muted); font-size: 12px; max-width: 80ch; display: grid; g
     const W = 210, M = 16;
 
     doc.setFont("helvetica", "bold"); doc.setFontSize(17); doc.setTextColor(...INK);
-    doc.text("Investeringsberegning for udlejningsbolig", M, 22);
+    doc.text(asc(d.heading), M, 22);
     doc.setFont("helvetica", "normal"); doc.setFontSize(10.5); doc.setTextColor(...MUT);
-    doc.text(asc(d.title), M, 29);
+    doc.text(asc(d.subtitle), M, 29);
     doc.text(asc("Udarbejdet " + d.dato + " med udlejningsberegner.dk"), M, 34.5);
 
     const bw = (W - 2 * M - 3 * 4) / 4, y0 = 41;
@@ -542,8 +811,9 @@ footer { color: var(--muted); font-size: 12px; max-width: 80ch; display: grid; g
     // Overskrifter over talkolonner højrestilles som tallene.
     const rightHead = cols => c => { if (c.section === "head" && cols.includes(c.column.index)) c.cell.styles.halign = "right"; };
     let y = y0 + 27;
-    const heading = (t, extra) => {
-      if (y > 250) { doc.addPage(); y = 20; }
+    // Start en ny side, hvis overskriften og tabellens rækker ikke kan være på den nuværende.
+    const heading = (t, extra, rows) => {
+      if (y + ((rows || 0) + 1) * 6.9 + (extra ? 12 : 8) > 279) { doc.addPage(); y = 20; }
       doc.setFont("helvetica", "bold"); doc.setFontSize(11.5); doc.setTextColor(...INK);
       doc.text(asc(t), M, y);
       if (extra) { doc.setFont("helvetica", "normal"); doc.setFontSize(8.5); doc.setTextColor(...MUT); doc.text(asc(extra), M, y + 4.5); y += 4.5; }
@@ -552,7 +822,7 @@ footer { color: var(--muted); font-size: 12px; max-width: 80ch; display: grid; g
     const after = () => { y = doc.lastAutoTable.finalY + 9; };
 
     // Forudsætninger i to kolonner side om side.
-    heading("Forudsætninger");
+    heading("Forudsætninger", null, Math.max(d.inputs[0][1].length, d.inputs[1][1].length));
     const [a, b] = d.inputs;
     const rows = [];
     for (let i = 0; i < Math.max(a[1].length, b[1].length); i++) {
@@ -563,7 +833,20 @@ footer { color: var(--muted); font-size: 12px; max-width: 80ch; display: grid; g
       columnStyles: { 0: { textColor: MUT }, 1: { halign: "right" }, 2: { textColor: MUT }, 3: { halign: "right" } } });
     after();
 
-    heading("Første år");
+    if (d.flere) {
+      heading("Lejemål", null, d.units.length + 1);
+      const tot = d.units.reduce((a, u) => ({ m2: a.m2 + u.m2, leje: a.leje + u.leje }), { m2: 0, leje: 0 });
+      const perM2 = u => (u.m2 > 0 ? asc(fmt.format(Math.round(u.leje * 12 / u.m2))) : "–");
+      doc.autoTable({ ...base, startY: y,
+        head: [["Lejemål", "Areal, m²", "Leje pr. md", "Leje pr. år", "Kr/m²/år"]],
+        body: [...d.units.map(u => [asc(u.navn), asc(fmt.format(u.m2)), asc(kr(u.leje)), asc(kr(u.leje * 12)), perM2(u)]),
+               ["I alt", asc(fmt.format(tot.m2)), asc(kr(tot.leje)), asc(kr(tot.leje * 12)), perM2(tot)]],
+        columnStyles: { 1: { halign: "right" }, 2: { halign: "right" }, 3: { halign: "right" }, 4: { halign: "right" } },
+        didParseCell: c => { rightHead([1, 2, 3, 4])(c); if (c.section === "body" && c.row.index === d.units.length) c.cell.styles.fontStyle = "bold"; } });
+      after();
+    }
+
+    heading("Første år", null, d.yr1.length);
     const sumRows = new Set(d.yr1.map((r, i) => (r[2] ? i : -1)));
     doc.autoTable({ ...base, startY: y, head: [["Post", "Beløb"]],
       body: d.yr1.map(([t, v]) => [t, asc(kr(v))]),
@@ -576,7 +859,7 @@ footer { color: var(--muted); font-size: 12px; max-width: 80ch; display: grid; g
       } });
     after();
 
-    heading("Rentefølsomhed", "Cash flow efter skat pr. måned ved forskellige renter og tomgang. Det fremhævede felt er beregningens tal.");
+    heading("Rentefølsomhed", "Cash flow efter skat pr. måned ved forskellige renter og tomgang. Det fremhævede felt er beregningens tal.", d.sens.rs.length);
     const g = d.sens;
     doc.autoTable({ ...base, startY: y,
       head: [["Rente", ...g.tg.map(t => asc("Tomgang " + pct(t)))]],
@@ -591,8 +874,7 @@ footer { color: var(--muted); font-size: 12px; max-width: 80ch; display: grid; g
       } });
     after();
 
-    doc.addPage(); y = 20;
-    heading("Fremskrivning over 10 år", "Husleje og udgifter stiger 2 % om året. Boligværdien stiger " + pct(d.o.vaerdi) + " om året. Alle beløb i kr.");
+    heading("Fremskrivning over 10 år", "Husleje og udgifter stiger 2 % om året. Ejendommens værdi stiger " + pct(d.o.vaerdi) + " om året. Alle beløb i kr.", 12);
     doc.autoTable({ ...base, startY: y,
       styles: { ...base.styles, fontSize: 7.4, cellPadding: 1.3 },
       head: [d.yearCols],
@@ -616,7 +898,7 @@ footer { color: var(--muted); font-size: 12px; max-width: 80ch; display: grid; g
     const d = reportData();
     const wb = new window.ExcelJS.Workbook();
     wb.creator = "Udlejningsberegneren"; wb.created = new Date();
-    const NF = { kr: '#,##0 "kr"', krmd: '#,##0 "kr/md"', kraar: '#,##0 "kr/år"', pct: "0.0%", pct2: "0.00%", aar: '0 "år"' };
+    const NF = { kr: '#,##0 "kr"', krmd: '#,##0 "kr/md"', kraar: '#,##0 "kr/år"', pct: "0.0%", pct2: "0.00%", aar: '0 "år"', m2: '#,##0 "m²"', krm2: '#,##0 "kr/m²/år"' };
     const cellVal = (v, f) => (f === "pct" || f === "pct2" ? v / 100 : f.startsWith("kr") ? Math.round(v) : v);
     const headRow = row => {
       row.font = { bold: true, color: { argb: "FFFFFFFF" } };
@@ -626,8 +908,8 @@ footer { color: var(--muted); font-size: 12px; max-width: 80ch; display: grid; g
 
     const ws = wb.addWorksheet("Oversigt");
     ws.columns = [{ width: 34 }, { width: 18 }, { width: 3 }, { width: 34 }, { width: 18 }];
-    ws.addRow(["Investeringsberegning for udlejningsbolig"]).font = { bold: true, size: 14 };
-    ws.addRow([d.title]);
+    ws.addRow([d.heading]).font = { bold: true, size: 14 };
+    ws.addRow([d.subtitle]);
     ws.addRow(["Udarbejdet " + d.dato + " med udlejningsberegner.dk"]).font = muted;
     ws.addRow([]);
 
@@ -659,6 +941,25 @@ footer { color: var(--muted); font-size: 12px; max-width: 80ch; display: grid; g
     });
     ws.addRow([]);
     ws.addRow(["Beregningen er vejledende og er ikke skatte- eller investeringsrådgivning. Renter fra Nykredit 22. oktober 2026."]).font = muted;
+
+    if (d.flere) {
+      const wu = wb.addWorksheet("Lejemål");
+      wu.columns = [{ width: 22 }, { width: 12 }, { width: 16 }, { width: 16 }, { width: 16 }];
+      headRow(wu.addRow(["Lejemål", "Areal, m²", "Leje pr. md", "Leje pr. år", "Kr/m²/år"]));
+      const first = 2;
+      d.units.forEach((u, i) => {
+        const r = first + i;
+        const row = wu.addRow([u.navn, u.m2, u.leje, { formula: `C${r}*12`, result: u.leje * 12 }, u.m2 > 0 ? { formula: `D${r}/B${r}`, result: Math.round(u.leje * 12 / u.m2) } : null]);
+        row.getCell(3).numFmt = row.getCell(4).numFmt = row.getCell(5).numFmt = "#,##0";
+      });
+      const last = first + d.units.length - 1, t = last + 1;
+      const tot = d.units.reduce((a, u) => ({ m2: a.m2 + u.m2, leje: a.leje + u.leje }), { m2: 0, leje: 0 });
+      const sum = wu.addRow(["I alt",
+        { formula: `SUM(B${first}:B${last})`, result: tot.m2 }, { formula: `SUM(C${first}:C${last})`, result: tot.leje },
+        { formula: `SUM(D${first}:D${last})`, result: tot.leje * 12 }, tot.m2 > 0 ? { formula: `D${t}/B${t}`, result: Math.round(tot.leje * 12 / tot.m2) } : null]);
+      sum.font = { bold: true };
+      sum.getCell(3).numFmt = sum.getCell(4).numFmt = sum.getCell(5).numFmt = "#,##0";
+    }
 
     const ws2 = wb.addWorksheet("10 år");
     ws2.columns = d.yearCols.map((c, i) => ({ width: i === 0 ? 6 : 15 }));
@@ -710,11 +1011,30 @@ footer { color: var(--muted); font-size: 12px; max-width: 80ch; display: grid; g
   wire("btnXlsx", exportXlsx, "Excel-filen");
 
   $("f").addEventListener("input", e => {
+    const unit = e.target.closest(".unit");
+    if (unit) state.flere.units[+unit.dataset.i][e.target.dataset.k] = e.target.value;
     if (e.target.id === "rentetype") udfyldRente();
     render();
   });
   $("f").addEventListener("submit", e => e.preventDefault());
+  $("unitRows").addEventListener("click", e => {
+    const x = e.target.closest(".x");
+    if (!x || state.flere.units.length <= 2) return;
+    state.flere.units.splice(+x.parentElement.dataset.i, 1);
+    renderUnits(); render();
+  });
+  $("addUnit").addEventListener("click", () => {
+    const units = state.flere.units;
+    if (units.length >= MAX_UNITS) return;
+    units.push({ navn: "Lejemål " + (units.length + 1), m2: "", leje: "" });
+    renderUnits(); render();
+    const rows = $("unitRows").querySelectorAll(".unit input.txt");
+    rows[rows.length - 1].select();
+  });
+  document.querySelectorAll(".kat button").forEach(b => b.addEventListener("click", () => { if (b.dataset.kat !== state.kat) setKat(b.dataset.kat); }));
+  fillRates();
   udfyldRente();
+  $("exNote").textContent = EXNOTE.en;
   render();
 })();
 </script>
