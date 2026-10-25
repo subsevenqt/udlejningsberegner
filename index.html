@@ -159,11 +159,18 @@ label { display: grid; gap: 4px; font-size: 13px; color: var(--muted); min-width
 .unit, .unit-head { display: grid; grid-template-columns: minmax(0, 1.3fr) minmax(0, .7fr) minmax(0, 1fr) 34px; gap: 8px; align-items: center; }
 .unit-head { font-size: 12px; color: var(--muted); }
 .unit input { padding-right: 10px; }
-.unit .x { width: 34px; height: 36px; border-radius: 7px; border: 1px solid var(--line); background: transparent; color: var(--muted); font-size: 18px; line-height: 1; cursor: pointer; }
-.unit .x:hover { color: var(--neg); border-color: var(--neg); }
+.unit .x, .loan .x { width: 34px; height: 36px; border-radius: 7px; border: 1px solid var(--line); background: transparent; color: var(--muted); font-size: 18px; line-height: 1; cursor: pointer; }
+.unit .x:hover, .loan .x:hover { color: var(--neg); border-color: var(--neg); }
 .unit .x:disabled { opacity: .35; cursor: not-allowed; }
 .units-foot { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; justify-content: space-between; }
 .units-sum { font: 500 13px/1.4 var(--mono); color: var(--ink); font-variant-numeric: tabular-nums; }
+
+/* Egne lån */
+.loans { display: grid; gap: 10px; }
+.loan { border: 1px solid var(--line); border-radius: 9px; padding: 12px 12px 14px; display: grid; gap: 10px; }
+.loan-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.loan-head b { font-size: 14px; color: var(--ink); }
+.loan-out { margin: 0; font-size: 12px; line-height: 1.45; color: var(--ink); background: var(--accent-soft); border-radius: 7px; padding: 8px 10px; }
 
 .results { display: grid; gap: 16px; position: sticky; top: calc(env(safe-area-inset-top, 0px) + 12px); }
 @media (max-width: 880px) { .results { position: static; } }
@@ -442,20 +449,30 @@ footer.site-foot { border-top: 1px solid var(--line); padding-block: 26px 40px; 
 
         <fieldset>
           <legend>Finansiering</legend>
-          <div class="row">
-            <label for="belaan" data-sit="koeb">Realkreditlån<span class="inp"><input id="belaan" inputmode="decimal" value="80"><span class="u">%</span></span></label>
-            <label for="gaeld" data-sit="ejer" hidden>Restgæld i dag<span class="inp"><input id="gaeld" inputmode="numeric" value="1.400.000"><span class="u">kr</span></span></label>
-            <label for="loebetid"><span data-sit="koeb">Løbetid</span><span data-sit="ejer" hidden>Restløbetid</span><span class="inp"><input id="loebetid" inputmode="numeric" value="30"><span class="u">år</span></span></label>
+          <div class="stack-sm" data-sit="koeb">
+            <div class="row">
+              <label for="belaan">Realkreditlån<span class="inp"><input id="belaan" inputmode="decimal" value="80"><span class="u">%</span></span></label>
+              <label for="loebetid">Løbetid<span class="inp"><input id="loebetid" inputmode="numeric" value="30"><span class="u">år</span></span></label>
+            </div>
+            <label for="rentetype">Rentetype<span class="inp"><select id="rentetype"><option value="fast">Fast rente, 30 år</option><option value="variabel">Variabel rente (3M CIBOR)</option></select></span></label>
+            <div class="row">
+              <label for="rente">Rente<span class="inp"><input id="rente" inputmode="decimal" value="4,46"><span class="u">%</span></span></label>
+              <label for="bidrag">Bidragssats<span class="inp"><input id="bidrag" inputmode="decimal" value="1,00"><span class="u">%</span></span></label>
+            </div>
+            <p class="hint" id="renteKilde"></p>
+            <label for="laanomk">Låneomkostninger (pant, kurtage, kursfradrag)<span class="inp"><input id="laanomk" inputmode="decimal" value="1,5"><span class="u">% af lån</span></span></label>
+            <label class="check" for="afdragsfri"><input type="checkbox" id="afdragsfri"> Afdragsfrit de første 10 år</label>
+            <p class="hint">Til udlejningsejendomme kan man typisk låne op til 80 % i realkredit. Resten er udbetaling.</p>
           </div>
-          <label for="rentetype">Rentetype<span class="inp"><select id="rentetype"><option value="fast">Fast rente, 30 år</option><option value="variabel">Variabel rente (3M CIBOR)</option></select></span></label>
-          <div class="row">
-            <label for="rente">Rente<span class="inp"><input id="rente" inputmode="decimal" value="4,46"><span class="u">%</span></span></label>
-            <label for="bidrag">Bidragssats<span class="inp"><input id="bidrag" inputmode="decimal" value="1,00"><span class="u">%</span></span></label>
+          <div class="stack-sm" data-sit="ejer" hidden>
+            <p class="hint">Skriv dine lån, som de står på din seneste låneoversigt eller i netbanken. Har du flere lån i ejendommen, f.eks. et realkreditlån og et banklån, så skriv dem hver for sig.</p>
+            <div class="loans" id="loanRows"></div>
+            <div class="units-foot">
+              <button type="button" class="btn ghost small" id="addLoan">Tilføj lån</button>
+              <span class="units-sum" id="loansSum"></span>
+            </div>
+            <p class="hint">Rentesatsen er den rente, der står på lånet, f.eks. 1,5 % på et fastforrentet realkreditlån eller den nuværende rente på et variabelt lån. Brug ikke ÅOP. Lånene regnes som annuitetslån over restløbetiden, realkreditlån med betaling hvert kvartal og andre lån hver måned. Er et lån afdragsfrit nu, begynder afdragene, når afdragsfriheden slutter, og så stiger ydelsen. Variable renter regnes uændrede, men du kan se effekten af en rentestigning nedenfor. Kursen bruges kun, når du sammenligner med at sælge i dag: et fastforrentet lån med lav rente kan ofte indfries under kurs 100 ved at købe obligationerne. Kursen står i netbanken eller hos dit realkreditinstitut.</p>
           </div>
-          <p class="hint" id="renteKilde"></p>
-          <label for="laanomk" data-sit="koeb">Låneomkostninger (pant, kurtage, kursfradrag)<span class="inp"><input id="laanomk" inputmode="decimal" value="1,5"><span class="u">% af lån</span></span></label>
-          <label class="check" for="afdragsfri"><input type="checkbox" id="afdragsfri"> Afdragsfrit de første 10 år</label>
-          <p class="hint" data-sit="koeb">Til udlejningsejendomme kan man typisk låne op til 80 % i realkredit. Resten er udbetaling.</p>
         </fieldset>
 
         <fieldset>
@@ -523,7 +540,7 @@ footer.site-foot { border-top: 1px solid var(--line); padding-block: 26px 40px; 
           <h2>Hvor går grænsen?</h2>
           <div class="kpis three">
             <div class="kpi"><span>Laveste leje</span><b id="gLeje">–</b><small id="gLejeN"></small></div>
-            <div class="kpi"><span>Højeste rente</span><b id="gRente">–</b><small id="gRenteN"></small></div>
+            <div class="kpi"><span id="gRenteL">Højeste rente</span><b id="gRente">–</b><small id="gRenteN"></small></div>
             <div class="kpi"><span>Tomgang du kan tåle</span><b id="gTom">–</b><small id="gTomN"></small></div>
           </div>
           <p class="hint">Grænsen er der, hvor cash flow efter skat i år 1 bliver 0 kr. Se flere scenarier under <a href="#vaerktoejer" data-tab-link="stress">Stresstest</a>.</p>
@@ -544,7 +561,7 @@ footer.site-foot { border-top: 1px solid var(--line); padding-block: 26px 40px; 
 
         <section class="card">
           <h2>Hvad sker der, hvis renten stiger?</h2>
-          <p class="hint">Cash flow efter skat pr. måned ved forskellige renter og tomgang. Det fremhævede felt er dine tal.</p>
+          <p class="hint" id="sensHint">Cash flow efter skat pr. måned ved forskellige renter og tomgang. Det fremhævede felt er dine tal.</p>
           <div class="tbl-scroll"><table class="sens" id="sens"></table></div>
         </section>
 
@@ -1116,12 +1133,13 @@ footer.site-foot { border-top: 1px solid var(--line); padding-block: 26px 40px; 
   const SATS = { aar: 2026, am: 8, rentGraense: 50000, vaerelseMin: 24000, vaerelsePct: 4 / 3,
     korttidPlatform: 35100, korttidUden: 13800, sommerhusBureau: 50200, sommerhusUden: 13800, skattefriAndel: 40 };
   const MAX_UNITS = 6;
+  const MAX_LOANS = 4;
   const YEARS = 30;
 
   // Hver ejendomstype har sit eget eksempel og husker sine egne tal, når man skifter.
   const KAT_FIELDS = ["adresse", "pris", "areal", "leje", "tomgang", "vaerdi", "omk", "faelles", "grundskyld", "forsikring",
     "renovation", "elvand", "sne", "revision", "adm", "andre", "vedl"];
-  const COMMON_FIELDS = ["belaan", "loebetid", "rentetype", "rente", "bidrag", "laanomk", "marg", "fradrag", "gaeld", "kpris", "kaar", "beboet"];
+  const COMMON_FIELDS = ["belaan", "loebetid", "rentetype", "rente", "bidrag", "laanomk", "marg", "fradrag", "kpris", "kaar", "beboet"];
   const CHECKS = ["afdragsfri", "par"];
   const THIS_YEAR = new Date().getFullYear();
   const state = {
@@ -1136,12 +1154,19 @@ footer.site-foot { border-top: 1px solid var(--line); padding-block: 26px 40px; 
              units: [
                { navn: "St. tv.", m2: "68", leje: "8.200" }, { navn: "St. th.", m2: "72", leje: "8.600" },
                { navn: "1. tv.", m2: "68", leje: "8.400" }, { navn: "1. th.", m2: "72", leje: "8.800" }
-             ] }
+             ] },
+    // Ejerens egne lån. Eksemplet er et fastforrentet realkreditlån på 1,5 % med 18 år tilbage.
+    loans: [{ type: "rk", rt: "fast", rest: "1.400.000", rente: "1,50", aar: "18", bidrag: "1,00", io: false, ioAar: "", kurs: "100" }]
   };
+  const LOAN_TYPES = { rk: "Realkreditlån", bank: "Banklån", andet: "Andet lån, f.eks. pantebrev" };
+  const newLoan = type => ({ type, rt: type === "rk" ? "fast" : "var", rest: "", rente: "", aar: type === "rk" ? "30" : "10", bidrag: "1,00", io: false, ioAar: "", kurs: "100" });
+  // Gemte beregninger fra før, hvor ejer-beregningen kun havde ét lån.
+  const legacyLoans = s => [{ type: "rk", rt: s.rentetype === "variabel" ? "var" : "fast", rest: s.gaeld || "0", rente: s.rente || "0",
+    aar: s.loebetid || "30", bidrag: s.bidrag || "0", io: !!s.afdragsfri, ioAar: "10", kurs: "100" }];
   const EXNOTE = {
     en: "Tallene er et eksempel på en 75 m² ejerlejlighed i Aarhus. Ret dem til din egen bolig.",
     flere: "Tallene er et eksempel på en ejendom i Odense med fire lejligheder. Ret dem og lejemålene til din egen ejendom.",
-    ejer: " Skriv selv, hvad ejendommen er værd i dag, og hvad du skylder. Vi vurderer ikke boligen."
+    ejer: " Skriv selv, hvad ejendommen er værd i dag, og dine lån, som de står på låneoversigten. Vi vurderer ikke boligen."
   };
   const exNote = () => EXNOTE[state.kat] + (state.sit === "ejer" ? EXNOTE.ejer : "");
   // Grove udgangspunkter for vedligehold i kr pr. m² om året.
@@ -1161,6 +1186,36 @@ footer.site-foot { border-top: 1px solid var(--line); padding-block: 26px 40px; 
       </div>`).join("");
     $("addUnit").disabled = units.length >= MAX_UNITS;
     $("addUnit").textContent = units.length >= MAX_UNITS ? "Højst 6 lejemål" : "Tilføj lejemål";
+  }
+
+  function renderLoans() {
+    const loans = state.loans;
+    const opt = (v, t, cur) => `<option value="${v}"${v === cur ? " selected" : ""}>${t}</option>`;
+    $("loanRows").innerHTML = loans.length ? loans.map((l, i) => {
+      const n = i + 1, rk = l.type === "rk", kurs = rk && l.rt === "fast";
+      return `
+      <div class="loan" data-i="${i}">
+        <div class="loan-head"><b>Lån ${n}</b><button type="button" class="x" aria-label="Fjern lån ${n}">×</button></div>
+        <div class="row">
+          <label>Långiver<span class="inp"><select data-k="type">${Object.entries(LOAN_TYPES).map(([k, t]) => opt(k, t, l.type)).join("")}</select></span></label>
+          <label>Rentetype<span class="inp"><select data-k="rt">${opt("fast", "Fast rente", l.rt)}${opt("var", "Variabel rente", l.rt)}</select></span></label>
+        </div>
+        <div class="row">
+          <label>Restgæld<span class="inp"><input data-k="rest" inputmode="numeric" value="${esc(l.rest)}"><span class="u">kr</span></span></label>
+          <label>Rentesats<span class="inp"><input data-k="rente" inputmode="decimal" value="${esc(l.rente)}"><span class="u">%</span></span></label>
+        </div>
+        <div class="row">
+          <label>Restløbetid<span class="inp"><input data-k="aar" inputmode="decimal" value="${esc(l.aar)}"><span class="u">år</span></span></label>
+          ${rk ? `<label>Bidragssats<span class="inp"><input data-k="bidrag" inputmode="decimal" value="${esc(l.bidrag)}"><span class="u">%</span></span></label>` : ""}
+        </div>
+        <label class="check"><input type="checkbox" data-k="io"${l.io ? " checked" : ""}> Lånet er afdragsfrit nu</label>
+        ${l.io || kurs ? `<div class="row">${l.io ? `<label>Afdragsfrihed tilbage<span class="inp"><input data-k="ioAar" inputmode="decimal" placeholder="f.eks. 5" value="${esc(l.ioAar)}"><span class="u">år</span></span></label>` : ""}` +
+          `${kurs ? `<label>Kurs, hvis lånet indfries i dag<span class="inp"><input data-k="kurs" inputmode="decimal" value="${esc(l.kurs)}"></span></label>` : ""}</div>` : ""}
+        <p class="loan-out" data-loan-out="${i}"></p>
+      </div>`;
+    }).join("") : '<p class="hint">Ingen lån. Ejendommen er regnet uden gæld.</p>';
+    $("addLoan").disabled = loans.length >= MAX_LOANS;
+    $("addLoan").textContent = loans.length >= MAX_LOANS ? `Højst ${MAX_LOANS} lån` : "Tilføj lån";
   }
 
   function setKat(kat, snapshot = true) {
@@ -1195,9 +1250,7 @@ footer.site-foot { border-top: 1px solid var(--line); padding-block: 26px 40px; 
   };
 
   function renteKilde() {
-    $("renteKilde").textContent = state.sit === "ejer"
-      ? "Skriv renten og bidragssatsen fra dit nuværende lån. Restgæld og restløbetid står på din låneoversigt. Vælger du rentetype, udfyldes dagens markedsrente."
-      : $("rentetype").value === "fast"
+    $("renteKilde").textContent = $("rentetype").value === "fast"
       ? "Nykredits effektive rente på et 30-årigt 4 %-lån er " + dec(RENTER.fast, 2) + " %. Bidragssatsen er 1 % som standard. Du kan selv rette tallene."
       : "3M CIBOR er " + dec(RENTER.variabel, 2) + " %. Beregningen antager, at renten er den samme i hele perioden, så brug tabellen nedenfor til at se effekten af en rentestigning.";
   }
@@ -1208,23 +1261,55 @@ footer.site-foot { border-top: 1px solid var(--line); padding-block: 26px 40px; 
 
   // ---------- Model ----------
 
-  // Ét år med månedlige terminer: renter, bidrag og afdrag. Opdaterer restgælden.
-  function loanYear(ls, rMonth, bidragMonth, totalMonths, ioMonths) {
+  // Ved køb er der ét realkreditlån. Ejer man ejendommen, er det ejerens egne lån.
+  function loansOf(o) {
+    if (o.sit === "ejer") return o.loans;
+    return [{ type: "rk", rt: o.rentetype === "variabel" ? "var" : "fast", rest: Math.max(0, o.pris * o.belaan / 100), rente: o.rente,
+      bidrag: o.bidrag, aar: o.loebetid, ioAar: o.afdragsfri ? 10 : 0, kurs: 100 }];
+  }
+  // En rentestigning rammer lånet ved køb, men kun de variable lån, når man allerede ejer ejendommen.
+  const rammes = (o, L) => o.sit !== "ejer" || L.rt === "var";
+  const harVariabel = o => o.sit !== "ejer" || o.loans.some(L => L.rt === "var" && L.rest > 0);
+
+  // Terminer: realkredit betales hvert kvartal, andre lån hver måned.
+  function prepLoan(L) {
+    const n = L.type === "rk" ? 4 : 12;
+    const total = Math.max(1, Math.round(L.aar * n));
+    // Er lånet afdragsfrit til udløb, forfalder hele restgælden i sidste termin.
+    const io = L.ioAar > 0 ? Math.min(Math.round(L.ioAar * n), total - 1) : 0;
+    return { ...L, n, total, io };
+  }
+
+  // Ét år for ét lån: renter, bidrag og afdrag. Ydelsen er en annuitet over restløbetiden og regnes igen hver termin. Opdaterer restgælden.
+  function loanYear(L, ls, dRente) {
+    const r = Math.max(0, L.rente + dRente) / 100 / L.n, b = L.bidrag / 100 / L.n;
     let renter = 0, bidrag = 0, afdrag = 0;
-    for (let m = 0; m < 12; m++) {
-      if (ls.month >= totalMonths || ls.rest <= 0) break;
-      const i = ls.rest * rMonth;
-      const b = ls.rest * bidragMonth;
+    for (let t = 0; t < L.n; t++) {
+      if (ls.k >= L.total || ls.rest <= 0) break;
+      const i = ls.rest * r;
       let p = 0;
-      if (ls.month >= ioMonths) {
-        const left = totalMonths - ls.month;
-        const pay = rMonth > 0 ? ls.rest * rMonth / (1 - Math.pow(1 + rMonth, -left)) : ls.rest / left;
-        p = pay - i;
+      if (ls.k >= L.io) {
+        const left = L.total - ls.k;
+        p = (r > 0 ? ls.rest * r / (1 - Math.pow(1 + r, -left)) : ls.rest / left) - i;
       }
-      renter += i; bidrag += b; afdrag += p;
-      ls.rest -= p; ls.month++;
+      renter += i; bidrag += ls.rest * b; afdrag += p;
+      ls.rest -= p; ls.k++;
     }
     return { renter, bidrag, afdrag };
+  }
+
+  // Ydelse pr. termin nu og efter afdragsfriheden, så ejeren kan tjekke tallene mod sin låneoversigt.
+  function loanInfo(L) {
+    const P = prepLoan(L);
+    const r = L.rente / 100 / P.n, b = L.bidrag / 100 / P.n;
+    const annuitet = left => (r > 0 ? L.rest * r / (1 - Math.pow(1 + r, -left)) : L.rest / left);
+    return {
+      ...P,
+      forste: P.io > 0 ? L.rest * (r + b) : annuitet(P.total) + L.rest * b,
+      afdrag1: P.io > 0 ? 0 : annuitet(P.total) - L.rest * r,
+      efter: P.io > 0 ? annuitet(P.total - P.io) + L.rest * b : 0,
+      tilUdloeb: P.io > 0 && L.ioAar >= L.aar
+    };
   }
 
   // Skat af personlig indkomst. Et underskud trækkes fra uden AM-bidrag.
@@ -1238,16 +1323,17 @@ footer.site-foot { border-top: 1px solid var(--line); padding-block: 26px 40px; 
   }
 
   function model(o) {
-    // Ejer man allerede ejendommen, er lånet den nuværende restgæld, og egenkapitalen er friværdien.
+    // Ejer man allerede ejendommen, er gælden ejerens egne lån, og egenkapitalen er friværdien.
     const ejer = o.sit === "ejer";
-    const loan = ejer ? Math.max(0, o.gaeld) : o.pris * o.belaan / 100;
+    const loans = loansOf(o).map(prepLoan);
+    const loan = loans.reduce((a, L) => a + L.rest, 0);
     const tinglysning = ejer ? 0 : 1850 + 0.006 * o.pris;
     const laanKr = ejer ? 0 : loan * o.laanomk / 100;
     const kobsomk = ejer ? 0 : tinglysning + o.omk + laanKr;
     const ek = o.pris - loan + kobsomk;
-    const totalMonths = Math.max(1, Math.round(o.loebetid * 12));
-    const ioMonths = o.afdragsfri ? Math.min(120, totalMonths - 1) : 0;
-    const ls = { rest: loan, month: 0 };
+    const ls = loans.map(L => ({ rest: L.rest, k: 0 }));
+    const dR = o.dRente || 0;
+    const restNu = () => ls.reduce((a, s) => a + s.rest, 0);
     const faste = o.faelles * 12 + o.grundskyld + o.forsikring + o.renovation + o.elvand + o.sne + o.revision + o.adm + o.andre;
     const years = [];
     let value = o.pris;
@@ -1256,17 +1342,19 @@ footer.site-foot { border-top: 1px solid var(--line); padding-block: 26px 40px; 
       const effLeje = o.leje * 12 * infl * (1 - o.tomgang / 100);
       const drift = (faste + o.vedl * o.areal) * infl;
       const noi = effLeje - drift;
-      const restStart = ls.rest;
-      const l = loanYear(ls, o.rente / 100 / 12, o.bidrag / 100 / 12, totalMonths, ioMonths);
+      const restStart = restNu();
+      const lp = loans.map((L, j) => loanYear(L, ls[j], rammes(o, L) ? dR : 0));
+      const l = lp.reduce((a, x) => ({ renter: a.renter + x.renter, bidrag: a.bidrag + x.bidrag, afdrag: a.afdrag + x.afdrag }), { renter: 0, bidrag: 0, afdrag: 0 });
       const cfFoer = noi - l.renter - l.bidrag - l.afdrag;
       const skat = personSkat(noi, o) + kapSkat(-(l.renter + l.bidrag), o, 0);
       const cfEfter = cfFoer - skat;
       value *= 1 + o.vaerdi / 100;
-      years.push({ y, infl, effLeje, drift, noi, ...l, restStart, cfFoer, skat, cfEfter, value, rest: ls.rest, frivaerdi: value - ls.rest });
+      const rest = restNu();
+      years.push({ y, infl, effLeje, drift, noi, ...l, lp, restStart, cfFoer, skat, cfEfter, value, rest, frivaerdi: value - rest });
     }
     const y1 = years[0];
     return {
-      loan, tinglysning, laanKr, kobsomk, ek, years, y1, faste,
+      loan, loans, tinglysning, laanKr, kobsomk, ek, years, y1, faste,
       brutto: o.pris > 0 ? o.leje * 12 / o.pris * 100 : 0,
       netto: y1.noi / (o.pris + kobsomk) * 100,
       roe: ek > 0 ? (y1.cfEfter + y1.afdrag + o.pris * o.vaerdi / 100) / ek * 100 : NaN
@@ -1279,15 +1367,30 @@ footer.site-foot { border-top: 1px solid var(--line); padding-block: 26px 40px; 
     [...KAT_FIELDS, ...COMMON_FIELDS].forEach(id => { s[id] = $(id).value; });
     CHECKS.forEach(id => { s[id] = $(id).checked; });
     if (state.kat === "flere") s.units = state.flere.units.map(u => ({ ...u }));
+    if (state.sit === "ejer") s.loans = state.loans.map(l => ({ ...l }));
     return s;
+  }
+  function parseLoan(l) {
+    const type = LOAN_TYPES[l.type] ? l.type : "rk", rt = l.rt === "var" ? "var" : "fast";
+    const aar = Math.max(0, parse(l.aar));
+    return {
+      type, rt, aar, rest: Math.max(0, parse(l.rest)), rente: Math.max(0, parse(l.rente)),
+      bidrag: type === "rk" ? Math.max(0, parse(l.bidrag)) : 0,
+      ioAar: l.io ? Math.min(aar, Math.max(0, parse(l.ioAar))) : 0,
+      // Et fastforrentet realkreditlån kan indfries til kurs 100 eller købes op billigere, hvis kursen er lavere.
+      kurs: type === "rk" && rt === "fast" ? Math.min(100, Math.max(0, parse(l.kurs) || 100)) : 100
+    };
   }
   function toInput(s) {
     const flere = s.kat === "flere";
     const p = id => parse(s[id] == null ? "" : s[id]);
     const units = flere ? (s.units || []).map(u => ({ navn: String(u.navn || "").trim() || "Lejemål", m2: parse(u.m2), leje: parse(u.leje) })) : [];
+    const ejer = s.sit === "ejer";
+    const loans = ejer ? (Array.isArray(s.loans) ? s.loans : legacyLoans(s)).map(parseLoan) : [];
     return {
-      sit: s.sit === "ejer" ? "ejer" : "koeb", kat: s.kat, units, adresse: String(s.adresse || "").trim(),
-      gaeld: p("gaeld"), kpris: p("kpris"), kaar: p("kaar"), beboet: s.beboet === "ja",
+      sit: ejer ? "ejer" : "koeb", kat: s.kat, units, adresse: String(s.adresse || "").trim(), loans,
+      gaeld: loans.reduce((a, L) => a + L.rest, 0), indfri: loans.reduce((a, L) => a + L.rest * L.kurs / 100, 0),
+      kpris: p("kpris"), kaar: p("kaar"), beboet: s.beboet === "ja",
       pris: p("pris"),
       leje: flere ? units.reduce((a, u) => a + u.leje, 0) : p("leje"),
       areal: flere ? units.reduce((a, u) => a + u.m2, 0) : p("areal"),
@@ -1314,12 +1417,20 @@ footer.site-foot { border-top: 1px solid var(--line); padding-block: 26px 40px; 
     ];
   }
 
-  // Følsomhed: rente -1 til +2 point mod tomgang 0 %, dine tal og 10 %.
+  // Følsomhed: rente -1 til +2 point mod tomgang 0 %, dine tal og 10 %. For ejere ændres kun renten på de variable lån.
   function sensGrid(o) {
     const tg = [0, o.tomgang, 10].filter((v, i, a) => a.indexOf(v) === i).sort((a, b) => a - b);
-    const rs = [-1, 0, 1, 2].map(d => o.rente + d).filter(v => v >= 0);
-    const cells = rs.map(rv => tg.map(t => model({ ...o, rente: rv, tomgang: t }).y1.cfEfter / 12));
-    return { tg, rs, cells };
+    const ejer = o.sit === "ejer", vari = harVariabel(o);
+    const ds = vari ? [-1, 0, 1, 2].filter(d => ejer || o.rente + d >= 0) : [0];
+    const gaeldfri = ejer && !(o.gaeld > 0);
+    const labels = ds.map(d => (!ejer ? dec(o.rente + d, 2) + " %" : gaeldfri ? "Ingen lån" : !vari ? "Fast rente" : d === 0 ? "Som nu" : (d > 0 ? "+" : "-") + Math.abs(d) + " point"));
+    const cells = ds.map(d => tg.map(t => model({ ...o, dRente: d, tomgang: t }).y1.cfEfter / 12));
+    const head = ejer && vari ? "Variabel rente" : "Rente";
+    const note = !ejer ? "Cash flow efter skat pr. måned ved forskellige renter og tomgang."
+      : gaeldfri ? "Ejendommen har ingen gæld, så renten påvirker ikke cash flow. Tabellen viser cash flow efter skat pr. måned ved forskellig tomgang."
+      : vari ? "Cash flow efter skat pr. måned, hvis renten på de variable lån ændrer sig, og ved forskellig tomgang. Lån med fast rente påvirkes ikke."
+      : "Lånene har fast rente, så en rentestigning ændrer ikke ydelsen. Tabellen viser cash flow efter skat pr. måned ved forskellig tomgang.";
+    return { tg, ds, labels, cells, head, note };
   }
 
   // Find x mellem lo og hi, hvor f(x) = 0. Giver NaN, hvis f ikke skifter fortegn.
@@ -1335,17 +1446,35 @@ footer.site-foot { border-top: 1px solid var(--line); padding-block: 26px 40px; 
   }
 
   // Hvor går grænsen: laveste leje, højeste rente og største tomgang med cash flow efter skat på 0 kr i år 1.
+  // For ejere er rentegrænsen, hvor meget renten på de variable lån kan stige.
   function limits(o) {
     const cf = p => model({ ...o, ...p }).y1.cfEfter;
     const base = cf({});
+    const ejer = o.sit === "ejer", fast = !harVariabel(o);
+    const lo = ejer ? -Math.max(0, ...o.loans.filter(L => L.rt === "var").map(L => L.rente)) : -o.rente;
+    const hi = ejer ? 25 : 25 - o.rente;
+    const dRente = fast ? NaN : solve(d => cf({ dRente: d }), lo, hi);
     return {
       base,
       leje: solve(L => cf({ leje: L }), 0, Math.max(o.leje * 4, 10000)),
-      rente: solve(r => cf({ rente: r }), 0, 25),
-      renteHoj: cf({ rente: 25 }) > 0, renteLav: cf({ rente: 0 }) < 0,
+      fast, dRente, rente: ejer ? NaN : o.rente + dRente,
+      renteHoj: !fast && cf({ dRente: hi }) > 0, renteLav: !fast && cf({ dRente: lo }) < 0,
       tomgang: solve(t => cf({ tomgang: t }), 0, 100),
       tomLav: cf({ tomgang: 0 }) < 0
     };
+  }
+
+  function renteGraense(l, o) {
+    const ejer = o.sit === "ejer";
+    if (l.fast) return ejer && !(o.gaeld > 0) ? { v: "Ingen gæld", n: "Renten påvirker ikke cash flow", s: 1 }
+      : { v: "Fast rente", n: "En rentestigning ændrer ikke ydelsen på dine lån", s: 1 };
+    if (!isFinite(l.dRente)) return l.renteLav
+      ? { v: ejer ? "Ingen" : "Under 0 %", n: ejer ? "Negativ selv uden rente på de variable lån" : "Negativ selv uden rente", s: -1 }
+      : { v: ejer ? "Over 25 point" : "Over 25 %", n: "", s: 1 };
+    const d = l.dRente;
+    return ejer
+      ? { v: (d >= 0 ? "+" : "-") + dec(Math.abs(d), 2) + " point", n: d >= 0 ? "oven i renten på dine variable lån" : "så meget skal renten på dine variable lån falde", s: d }
+      : { v: dec(l.rente, 2) + " %", n: d >= 0 ? `${dec(d, 2)} point over din rente` : `${dec(-d, 2)} point under din rente`, s: d };
   }
 
   function stressParams() { return { rente: num("st_rente"), mdr: Math.max(0, Math.min(12, num("st_mdr"))), rep: num("st_rep") }; }
@@ -1353,12 +1482,13 @@ footer.site-foot { border-top: 1px solid var(--line); padding-block: 26px 40px; 
     const cf = p => model({ ...o, ...p }).y1.cfEfter;
     const tg = Math.max(o.tomgang, s.mdr / 12 * 100);
     const base = cf({});
+    const hvilke = o.sit !== "ejer" ? "" : !(o.gaeld > 0) ? " (ingen lån)" : harVariabel(o) ? " på de variable lån" : " (lånene har fast rente)";
     return [
       ["Dine tal", base],
-      [`Renten stiger ${dec(s.rente, 1)} point`, cf({ rente: o.rente + s.rente })],
+      [`Renten stiger ${dec(s.rente, 1)} point${hvilke}`, cf({ dRente: s.rente })],
       [`${fmt.format(s.mdr)} måneder uden lejer`, cf({ tomgang: tg })],
       [`Reparation på ${kr(s.rep)}`, base - s.rep],
-      ["Det hele på én gang", cf({ rente: o.rente + s.rente, tomgang: tg }) - s.rep]
+      ["Det hele på én gang", cf({ dRente: s.rente, tomgang: tg }) - s.rep]
     ];
   }
 
@@ -1461,7 +1591,8 @@ footer.site-foot { border-top: 1px solid var(--line); padding-block: 26px 40px; 
     const alt = num("so_alt") / 100, omk = num("ex_omk"), skat = num("ex_skat");
     const salgsomk0 = o.pris * omk / 100;
     const st0 = saleTax(o, r, o.pris, salgsomk0, 0, 0, skat);
-    const nu = o.pris - salgsomk0 - o.gaeld - st0.skat;
+    // Fastforrentede lån indfries til den kurs, ejeren har skrevet. Senere salg regnes til kurs 100.
+    const nu = o.pris - salgsomk0 - o.indfri - st0.skat;
     const e = exitCalc(o, r, { aar: N, omk, forb: 0, skat });
     // Cash flow undervejs forrentes med samme afkast som pengene ved et salg i dag.
     let lej = e.provenu;
@@ -1469,7 +1600,7 @@ footer.site-foot { border-top: 1px solid var(--line); padding-block: 26px 40px; 
     const saelg = nu * Math.pow(1 + alt, N);
     const flows = [-nu, ...r.years.slice(0, N).map(y => y.cfEfter)];
     flows[N] += e.provenu;
-    return { N, alt, nu, salgsomk0, skat0: st0.skat, fri: st0.fri, saelg, lej, e, irr: irr(flows) };
+    return { N, alt, nu, salgsomk0, skat0: st0.skat, fri: st0.fri, saelg, lej, e, irr: irr(flows), kursgev: o.gaeld - o.indfri };
   }
 
   // ---------- Lejetjek ----------
@@ -1577,9 +1708,9 @@ footer.site-foot { border-top: 1px solid var(--line); padding-block: 26px 40px; 
     $("cfMd").innerHTML = (md >= 0 ? "+" : "") + fmt.format(Math.round(md)) + "<small>kr/md</small>";
     sign($("cfMd"), md);
     const afdragMd = y.afdrag / 12;
-    $("cfNote").textContent = afdragMd > 0
-      ? "Heraf afdrager du " + kr(afdragMd) + " om måneden på lånet"
-      : "Lånet er afdragsfrit, så du opsparer ikke via afdrag";
+    $("cfNote").textContent = !(r.loan > 0) ? "Ejendommen har ingen gæld"
+      : afdragMd > 0 ? "Heraf afdrager du " + kr(afdragMd) + " om måneden på " + (r.loans.length > 1 ? "lånene" : "lånet")
+      : (r.loans.length > 1 ? "Lånene er afdragsfrie" : "Lånet er afdragsfrit") + ", så du opsparer ikke via afdrag";
     $("kBrutto").textContent = pct(r.brutto);
     $("kNetto").textContent = pct(r.netto);
     const ejer = o.sit === "ejer";
@@ -1588,17 +1719,19 @@ footer.site-foot { border-top: 1px solid var(--line); padding-block: 26px 40px; 
     $("kEk").textContent = fmt.format(Math.round(r.ek / 1000)) + " t.kr";
     $("kRoe").textContent = pct(r.roe);
     sign($("kRoe"), isFinite(r.roe) ? r.roe : 0);
+    if (ejer) renderLoanInfo(o, r);
 
     $("yr1").innerHTML = yearRows(y).map(([t, v, sum]) =>
       `<tr${sum ? ' class="sum"' : ""}><td>${t}</td><td class="v ${sum ? (v < 0 ? "neg" : "pos") : ""}">${fmt.format(Math.round(v))} kr</td></tr>`
     ).join("");
 
     const g = sensGrid(o);
-    let h = "<thead><tr><th>Rente</th>" + g.tg.map(t => `<th>Tomgang ${pct(t)}</th>`).join("") + "</tr></thead><tbody>";
-    g.rs.forEach((rv, i) => {
-      h += `<tr><td>${pct(rv)}</td>` + g.tg.map((t, j) => {
+    $("sensHint").textContent = g.note + " Det fremhævede felt er dine tal.";
+    let h = `<thead><tr><th>${g.head}</th>` + g.tg.map(t => `<th>Tomgang ${pct(t)}</th>`).join("") + "</tr></thead><tbody>";
+    g.ds.forEach((dv, i) => {
+      h += `<tr><td>${g.labels[i]}</td>` + g.tg.map((t, j) => {
         const m = g.cells[i][j];
-        const base = rv === o.rente && t === o.tomgang;
+        const base = dv === 0 && t === o.tomgang;
         return `<td class="${base ? "base " : ""}${m < 0 ? "neg" : "pos"}">${fmt.format(Math.round(m))}</td>`;
       }).join("") + "</tr>";
     });
@@ -1607,6 +1740,28 @@ footer.site-foot { border-top: 1px solid var(--line); padding-block: 26px 40px; 
     drawChart(r, o);
     renderLimits(o);
     renderTools(o, r);
+  }
+
+  const fmtAar = v => dec(v, v % 1 ? 1 : 0) + " år";
+  function renderLoanInfo(o, r) {
+    o.loans.forEach((L, i) => {
+      const el = document.querySelector(`[data-loan-out="${i}"]`);
+      if (!el) return;
+      const raw = state.loans[i] || {};
+      if (!(L.rest > 0)) { el.textContent = "Skriv restgælden på lånet."; return; }
+      if (!(L.aar > 0)) { el.textContent = "Skriv restløbetiden på lånet."; return; }
+      if (raw.io && !(L.ioAar > 0)) { el.textContent = "Skriv, hvor mange år lånet er afdragsfrit endnu."; return; }
+      const f = loanInfo(L), per = f.n === 4 ? "pr. kvartal" : "pr. måned";
+      const nu = L.rt === "var" ? " med den nuværende rente" : "";
+      let t;
+      if (f.tilUdloeb) t = `Ydelse før skat ca. ${kr(f.forste)} ${per}${nu}, kun rente${L.bidrag > 0 ? " og bidrag" : ""}. Lånet er afdragsfrit til udløb, så hele restgælden på ${kr(L.rest)} skal betales eller lånes om om ${fmtAar(L.aar)}. Det er regnet med i beregningen.`;
+      else if (f.io > 0) t = `Ydelse før skat ca. ${kr(f.forste)} ${per}${nu}, kun rente${L.bidrag > 0 ? " og bidrag" : ""}. Når afdragsfriheden slutter om ${fmtAar(L.ioAar)}, stiger den til ca. ${kr(f.efter)} ${per}.`;
+      else t = `Ydelse før skat ca. ${kr(f.forste)} ${per}${nu}, heraf ${kr(f.afdrag1)} i afdrag i første termin.`;
+      el.textContent = t + " Tjek, at det passer med din låneoversigt.";
+    });
+    const y = r.y1;
+    $("loansSum").textContent = o.loans.length && o.gaeld > 0
+      ? `${kr(o.gaeld)} · ${pct(o.pris > 0 ? o.gaeld / o.pris * 100 : 0)} belånt · ydelse år 1 ca. ${kr((y.renter + y.bidrag + y.afdrag) / 12)}/md` : "";
   }
 
   function renderVedlHint(o) {
@@ -1624,15 +1779,11 @@ footer.site-foot { border-top: 1px solid var(--line); padding-block: 26px 40px; 
       $("gLejeN").textContent = d <= 0 ? `${pct(-d)} under din leje` : `${pct(d)} over din leje`;
       sign($("gLeje"), -d);
     } else { $("gLeje").textContent = "–"; $("gLejeN").textContent = ""; }
-    if (isFinite(l.rente)) {
-      $("gRente").textContent = dec(l.rente, 2) + " %";
-      $("gRenteN").textContent = l.rente >= o.rente ? `${dec(l.rente - o.rente, 2)} point over din rente` : `${dec(o.rente - l.rente, 2)} point under din rente`;
-      sign($("gRente"), l.rente - o.rente);
-    } else {
-      $("gRente").textContent = l.renteLav ? "Under 0 %" : "Over 25 %";
-      $("gRenteN").textContent = l.renteLav ? "Negativ selv uden rente" : "";
-      sign($("gRente"), l.renteLav ? -1 : 1);
-    }
+    const rg = renteGraense(l, o);
+    $("gRenteL").textContent = o.sit === "ejer" && !l.fast ? "Rentestigning du kan tåle" : "Højeste rente";
+    $("gRente").textContent = rg.v;
+    $("gRenteN").textContent = rg.n;
+    sign($("gRente"), rg.s);
     if (isFinite(l.tomgang)) {
       $("gTom").textContent = pct(l.tomgang);
       $("gTomN").textContent = `ca. ${dec(l.tomgang * 12 / 100, 1)} måneder om året`;
@@ -1689,7 +1840,7 @@ footer.site-foot { border-top: 1px solid var(--line); padding-block: 26px 40px; 
   // ---------- Værktøjer ----------
 
   function renderTools(o, r) {
-    const fra = `Bruger tallene fra beregneren: ${kr(o.pris)} i ${o.sit === "ejer" ? "værdi" : "købspris"}, ${kr(o.leje)}/md i leje, ${dec(o.rente, 2)} % rente og ${pct(o.marg)} skat af overskud.`;
+    const fra = `Bruger tallene fra beregneren: ${kr(o.pris)} i ${o.sit === "ejer" ? "værdi" : "købspris"}, ${kr(o.leje)}/md i leje, ${laanTekst(o)} og ${pct(o.marg)} skat af overskud.`;
     ["skFra", "exFra", "stFra"].forEach(id => { $(id).textContent = fra; });
     if (o.sit === "ejer") renderSellRent(o, r);
     renderTax(o, r);
@@ -1701,6 +1852,13 @@ footer.site-foot { border-top: 1px solid var(--line); padding-block: 26px 40px; 
     renderVedl(o);
     renderDrift();
     renderAar(o);
+  }
+
+  function laanTekst(o) {
+    if (o.sit !== "ejer") return `${dec(o.rente, 2)} % rente`;
+    if (!(o.gaeld > 0)) return "ingen lån";
+    const snit = o.loans.reduce((a, L) => a + L.rest * L.rente, 0) / o.gaeld;
+    return `${kr(o.gaeld)} i lån til ${o.loans.length > 1 ? "gennemsnitligt " : ""}${dec(snit, 2)} % rente`;
   }
 
   function renderTax(o, r) {
@@ -1758,6 +1916,7 @@ footer.site-foot { border-top: 1px solid var(--line); padding-block: 26px 40px; 
     $("soNote").innerHTML = `<b class="${diff >= 0 ? "pos" : "neg"}">Udlejning giver ${kr(Math.abs(diff))} ${diff >= 0 ? "mere" : "mindre"}</b> efter ${s.N} år end at sælge i dag` +
       (isFinite(s.irr) ? `, og den forrenter pengene fra et salg med ${pct(s.irr * 100)} om året.` : ".") +
       (s.fri ? " Vi regner med, at et salg er skattefrit efter parcelhusreglen, fordi du selv har boet i boligen. Tjek, at det gælder for dig." : " Fortjenesten ved salg beskattes med satsen fra Salg og afkast.") +
+      (s.kursgev > 0.5 ? ` Dine fastforrentede lån er indfriet til den kurs, du har skrevet, så du betaler ${kr(s.kursgev)} mindre end restgælden. En kursgevinst på gæld er som udgangspunkt skattefri for private. Ved salg senere regner vi med kurs 100.` : "") +
       " Værdien er dit eget skøn og stiger med den værdistigning, du har valgt.";
   }
 
@@ -1810,7 +1969,7 @@ footer.site-foot { border-top: 1px solid var(--line); padding-block: 26px 40px; 
 
   function foraeldreData() {
     const m = read();
-    const o = { ...m, kat: "en", units: [], pris: num("fk_pris"), areal: num("fk_areal"), leje: num("fk_markeds"), faelles: num("fk_faelles"),
+    const o = { ...m, sit: "koeb", loans: [], kat: "en", units: [], pris: num("fk_pris"), areal: num("fk_areal"), leje: num("fk_markeds"), faelles: num("fk_faelles"),
       grundskyld: 0, forsikring: 0, renovation: 0, elvand: 0, sne: 0, revision: 0, adm: 0, andre: num("fk_drift"), vedl: 0,
       tomgang: 0, vaerdi: num("fk_vaerdi"), omk: num("fk_omk"), belaan: num("fk_belaan") };
     const r = model(o);
@@ -1986,7 +2145,7 @@ footer.site-foot { border-top: 1px solid var(--line); padding-block: 26px 40px; 
         ["Nettoafkast", m => pct(m.r.netto)],
         ["Forrentning af egenkapital", m => pct(m.r.roe)],
         ["Laveste leje (grænse)", m => (isFinite(m.l.leje) ? kr(m.l.leje) : "–")],
-        ["Højeste rente (grænse)", m => (isFinite(m.l.rente) ? dec(m.l.rente, 2) + " %" : "–")],
+        ["Rentegrænse", m => renteGraense(m.l, m.o).v],
         ["Afkast pr. år ved salg efter 10 år", m => (isFinite(m.e.irr) ? pct(m.e.irr * 100) : "–")]
       ];
       $("svCmp").innerHTML = "<thead><tr><th></th>" + sel.map(s => `<th>${esc(s.navn)}</th>`).join("") + "</tr></thead><tbody>" +
@@ -2003,6 +2162,10 @@ footer.site-foot { border-top: 1px solid var(--line); padding-block: 26px 40px; 
     if (snap.kat === "flere" && snap.units) state.flere.units = snap.units.map(u => ({ ...u }));
     COMMON_FIELDS.forEach(f => { if (snap[f] != null) $(f).value = snap[f]; });
     CHECKS.forEach(f => { $(f).checked = !!snap[f]; });
+    if (snap.sit === "ejer") {
+      state.loans = (Array.isArray(snap.loans) ? snap.loans : legacyLoans(snap)).map(l => ({ ...newLoan(LOAN_TYPES[l.type] ? l.type : "rk"), ...l }));
+      renderLoans();
+    }
     saFilled = false;
     setSit(snap.sit === "ejer" ? "ejer" : "koeb");
     setKat(snap.kat, false);
@@ -2119,20 +2282,27 @@ footer.site-foot { border-top: 1px solid var(--line); padding-block: 26px 40px; 
           ...(ejer ? [] : [["Købsomkostninger i alt", r.kobsomk, "kr"]])
         ]],
         ["Finansiering og skat", [
-          ...(ejer ? [["Restgæld i dag", r.loan, "kr"], ["Belåningsgrad", o.pris > 0 ? r.loan / o.pris * 100 : 0, "pct"]]
-                   : [["Realkreditlån", r.loan, "kr"], ["Belåningsgrad", o.belaan, "pct"]]),
-          ["Rentetype", $("rentetype").selectedOptions[0].textContent, "txt"], ["Rente", o.rente, "pct2"],
-          ["Bidragssats", o.bidrag, "pct2"], [ejer ? "Restløbetid" : "Løbetid", o.loebetid, "aar"],
-          ["Afdragsfrihed", o.afdragsfri ? "De første 10 år" : "Nej", "txt"], [ejer ? "Friværdi" : "Egenkapital inkl. omkostninger", r.ek, "kr"],
+          ...(ejer ? [["Gæld i alt i dag", r.loan, "kr"], ["Belåningsgrad", o.pris > 0 ? r.loan / o.pris * 100 : 0, "pct"],
+                      ["Antal lån", o.loans.length ? String(o.loans.length) + " (se tabellen Lån)" : "Ingen", "txt"]]
+                   : [["Realkreditlån", r.loan, "kr"], ["Belåningsgrad", o.belaan, "pct"],
+                      ["Rentetype", $("rentetype").selectedOptions[0].textContent, "txt"], ["Rente", o.rente, "pct2"],
+                      ["Bidragssats", o.bidrag, "pct2"], ["Løbetid", o.loebetid, "aar"],
+                      ["Afdragsfrihed", o.afdragsfri ? "De første 10 år" : "Nej", "txt"]]),
+          [ejer ? "Friværdi" : "Egenkapital inkl. omkostninger", r.ek, "kr"],
           ["Skat af overskud inkl. AM-bidrag", o.marg, "pct"], ["Værdi af rentefradrag", o.fradrag, "pct"],
           ["Ægtepar (fradragsgrænse 100.000 kr)", o.par ? "Ja" : "Nej", "txt"]
         ]]
       ],
       yr1: yearRows(r.y1),
+      loans: ejer ? o.loans.map((L, i) => {
+        const p = r.y1.lp[i];
+        return { navn: `Lån ${i + 1}: ${LOAN_TYPES[L.type].replace(", f.eks. pantebrev", "")}, ${L.rt === "var" ? "variabel" : "fast"} rente`,
+          rest: L.rest, rente: L.rente, bidrag: L.bidrag, aar: L.aar, io: L.ioAar, kurs: L.kurs, ydelse: (p.renter + p.bidrag + p.afdrag) / 12 };
+      }) : [],
       sens: sensGrid(o),
       yearCols: ["År", "Husleje", "Drift", "Overskud", "Renter og bidrag", "Afdrag", "Skat", "Cash flow efter skat", "Restgæld", "Boligværdi", "Friværdi"],
       yearVals: r.years.slice(0, 10).map(y => [y.y, y.effLeje, -y.drift, y.noi, -(y.renter + y.bidrag), -y.afdrag, -y.skat, y.cfEfter, y.rest, y.value, y.frivaerdi]),
-      forbehold: ejer ? [...FORBEHOLD, "Ejendommens værdi og gæld er indtastet af ejeren. Udlejningsberegneren vurderer ikke ejendomme."] : FORBEHOLD
+      forbehold: ejer ? [...FORBEHOLD, "Ejendommens værdi og lån er indtastet af ejeren. Udlejningsberegneren vurderer ikke ejendomme. Lånene er regnet som annuitetslån over restløbetiden, og variable renter er regnet uændrede."] : FORBEHOLD
     };
     if ($("udvidet").checked) {
       const sp = stressParams(), tp = taxParams(), ep = exitParams();
@@ -2151,7 +2321,7 @@ footer.site-foot { border-top: 1px solid var(--line); padding-block: 26px 40px; 
     const lim = x.limits;
     const limRows = [
       ["Laveste månedlige leje", isFinite(lim.leje) ? kr(lim.leje) : "–", isFinite(lim.leje) && o.leje > 0 ? pct(Math.abs(1 - lim.leje / o.leje) * 100) + (lim.leje <= o.leje ? " under" : " over") + " lejen i beregningen" : ""],
-      ["Højeste rente", isFinite(lim.rente) ? dec(lim.rente, 2) + " %" : (lim.renteLav ? "Under 0 %" : "Over 25 %"), isFinite(lim.rente) ? dec(lim.rente - o.rente, 2) + " point fra renten i beregningen" : ""],
+      (rg => [o.sit === "ejer" && !lim.fast ? "Rentestigning på variable lån" : "Højeste rente", rg.v, rg.n])(renteGraense(lim, o)),
       ["Største tomgang", isFinite(lim.tomgang) ? pct(lim.tomgang) : (lim.tomLav ? "Ingen" : "Over 100 %"), isFinite(lim.tomgang) ? "ca. " + dec(lim.tomgang * 12 / 100, 1) + " måneder om året" : ""]
     ];
     const base = x.stress[0][1];
@@ -2182,7 +2352,7 @@ footer.site-foot { border-top: 1px solid var(--line); padding-block: 26px 40px; 
       ["Udlejning i alt, med cash flow forrentet undervejs", S.lej],
       ["Forskel: udlejning minus salg i dag", S.lej - S.saelg]
     ] : null;
-    return { limRows, stressRows, taxRows, exitRows, irr: e.irr, lejeLines, vedl: V, saelgRows, saelgIrr: S ? S.irr : NaN, saelgFri: S ? S.fri : false,
+    return { limRows, stressRows, taxRows, exitRows, irr: e.irr, lejeLines, vedl: V, saelgRows, saelgIrr: S ? S.irr : NaN, saelgFri: S ? S.fri : false, saelgKurs: S ? S.kursgev : 0,
       taxNote: `Mest cash flow efter al skat over 10 år i beregningen: ${REGIME_NAVN[x.tax.best]}. Det er ikke en anbefaling. Virksomhedsordningen er regnet med overskuddet ${x.taxParams.vso === "opspar" ? "sparet op" : "hævet"}, ApS med ${kr(x.taxParams.aps)} i ekstra udgifter om året. Kapitalafkastsats ${pct(x.taxParams.sats)}.` };
   }
 
@@ -2279,6 +2449,17 @@ footer.site-foot { border-top: 1px solid var(--line); padding-block: 26px 40px; 
       after();
     }
 
+    if (d.loans.length) {
+      heading("Lån", "Som oplyst af ejeren. Ydelse før skat i år 1. Realkreditlån betales hvert kvartal, andre lån hver måned.", d.loans.length);
+      doc.autoTable({ ...base, startY: y,
+        head: [["Lån", "Restgæld", "Rente", "Bidrag", "Restløbetid", "Afdragsfrit", "Ydelse pr. md"]],
+        body: d.loans.map(L => [asc(L.navn), asc(kr(L.rest)), asc(dec(L.rente, 2) + " %"), L.bidrag > 0 ? asc(dec(L.bidrag, 2) + " %") : "-",
+          asc(fmtAar(L.aar)), L.io > 0 ? asc(fmtAar(L.io)) : "Nej", asc(kr(L.ydelse))]),
+        columnStyles: { 1: { halign: "right" }, 2: { halign: "right" }, 3: { halign: "right" }, 4: { halign: "right" }, 5: { halign: "right" }, 6: { halign: "right" } },
+        didParseCell: rightHead([1, 2, 3, 4, 5, 6]) });
+      after();
+    }
+
     heading("Første år", null, d.yr1.length);
     const sumRows = new Set(d.yr1.map((row, i) => (row[2] ? i : -1)));
     doc.autoTable({ ...base, startY: y, head: [["Post", "Beløb"]],
@@ -2292,17 +2473,17 @@ footer.site-foot { border-top: 1px solid var(--line); padding-block: 26px 40px; 
       } });
     after();
 
-    heading("Rentefølsomhed", "Cash flow efter skat pr. måned ved forskellige renter og tomgang. Det fremhævede felt er beregningens tal.", d.sens.rs.length);
+    heading("Rentefølsomhed", d.sens.note + " Det fremhævede felt er beregningens tal.", d.sens.ds.length);
     const g = d.sens;
     doc.autoTable({ ...base, startY: y,
-      head: [["Rente", ...g.tg.map(t => asc("Tomgang " + pct(t)))]],
-      body: g.rs.map((rv, i) => [asc(dec(rv, 2) + " %"), ...g.cells[i].map(v => asc(fmt.format(Math.round(v)) + " kr"))]),
+      head: [[g.head, ...g.tg.map(t => asc("Tomgang " + pct(t)))]],
+      body: g.ds.map((dv, i) => [asc(g.labels[i]), ...g.cells[i].map(v => asc(fmt.format(Math.round(v)) + " kr"))]),
       columnStyles: Object.fromEntries(g.tg.map((t, j) => [j + 1, { halign: "right" }])),
       didParseCell: c => {
         rightHead(g.tg.map((t, j) => j + 1))(c);
         if (c.section !== "body" || c.column.index === 0) return;
         const i = c.row.index, j = c.column.index - 1;
-        if (g.rs[i] === d.o.rente && g.tg[j] === d.o.tomgang) { c.cell.styles.fillColor = SOFT; c.cell.styles.fontStyle = "bold"; }
+        if (g.ds[i] === 0 && g.tg[j] === d.o.tomgang) { c.cell.styles.fillColor = SOFT; c.cell.styles.fontStyle = "bold"; }
         if (g.cells[i][j] < 0) c.cell.styles.textColor = NEG;
       } });
     after();
@@ -2344,7 +2525,8 @@ footer.site-foot { border-top: 1px solid var(--line); padding-block: 26px 40px; 
 
       if (s.saelgRows) {
         heading("Sælge nu eller leje ud?", "Værdien er ejerens eget skøn." + (isFinite(s.saelgIrr) ? " Udlejning forrenter pengene fra et salg i dag med " + pct(s.saelgIrr * 100) + " om året." : "") +
-          (s.saelgFri ? " Salget er regnet skattefrit efter parcelhusreglen." : ""), s.saelgRows.length);
+          (s.saelgFri ? " Salget er regnet skattefrit efter parcelhusreglen." : "") +
+          (s.saelgKurs > 0.5 ? " Fastforrentede lån er indfriet til ejerens oplyste kurs, " + kr(s.saelgKurs) + " under restgælden." : ""), s.saelgRows.length);
         doc.autoTable({ ...base, startY: y, head: [["Post", "Beløb"]], body: s.saelgRows.map(([t, v]) => [asc(t), asc(kr(v))]),
           columnStyles: { 1: { halign: "right" } },
           didParseCell: c => { rightHead([1])(c); if (c.section === "body" && [1, 4, 5].includes(c.row.index)) c.cell.styles.fontStyle = "bold"; } });
@@ -2444,6 +2626,19 @@ footer.site-foot { border-top: 1px solid var(--line); padding-block: 26px 40px; 
       sum.getCell(3).numFmt = sum.getCell(4).numFmt = sum.getCell(5).numFmt = "#,##0";
     }
 
+    if (d.loans.length) {
+      const wl = wb.addWorksheet("Lån");
+      wl.columns = [{ width: 36 }, { width: 16 }, { width: 10 }, { width: 10 }, { width: 13 }, { width: 13 }, { width: 10 }, { width: 16 }];
+      headRow(wl.addRow(["Lån", "Restgæld", "Rente", "Bidrag", "Restløbetid, år", "Afdragsfrit, år", "Kurs i dag", "Ydelse år 1 pr. md"]));
+      d.loans.forEach(L => {
+        const row = wl.addRow([L.navn, Math.round(L.rest), L.rente / 100, L.bidrag / 100, L.aar, L.io, L.kurs, Math.round(L.ydelse)]);
+        row.getCell(2).numFmt = row.getCell(8).numFmt = NF.kr;
+        row.getCell(3).numFmt = row.getCell(4).numFmt = NF.pct2;
+      });
+      wl.addRow([]);
+      wl.addRow(["Som oplyst af ejeren. Annuitetslån over restløbetiden. Realkreditlån betales hvert kvartal, andre lån hver måned. Variable renter er regnet uændrede."]).font = muted;
+    }
+
     const ws2 = wb.addWorksheet("10 år");
     ws2.columns = d.yearCols.map((c, i) => ({ width: i === 0 ? 6 : 15 }));
     headRow(ws2.addRow(d.yearCols));
@@ -2456,16 +2651,15 @@ footer.site-foot { border-top: 1px solid var(--line); padding-block: 26px 40px; 
 
     const ws3 = wb.addWorksheet("Rentefølsomhed");
     const g = d.sens;
-    ws3.columns = [{ width: 12 }, ...g.tg.map(() => ({ width: 18 }))];
-    ws3.addRow(["Cash flow efter skat pr. måned ved forskellige renter og tomgang"]).font = { bold: true };
-    headRow(ws3.addRow(["Rente", ...g.tg.map(t => "Tomgang " + pct(t))]));
-    g.rs.forEach((rv, i) => {
-      const row = ws3.addRow([rv / 100, ...g.cells[i].map(v => Math.round(v))]);
-      row.getCell(1).numFmt = NF.pct2;
+    ws3.columns = [{ width: 16 }, ...g.tg.map(() => ({ width: 18 }))];
+    ws3.addRow([g.note]).font = { bold: true };
+    headRow(ws3.addRow([g.head, ...g.tg.map(t => "Tomgang " + pct(t))]));
+    g.ds.forEach((dv, i) => {
+      const row = ws3.addRow([g.labels[i], ...g.cells[i].map(v => Math.round(v))]);
       g.cells[i].forEach((v, j) => {
         const c = row.getCell(j + 2);
         c.numFmt = NF.krmd;
-        if (rv === d.o.rente && g.tg[j] === d.o.tomgang) { c.font = { bold: true }; c.fill = { type: "pattern", pattern: "solid", fgColor: { argb: "FFE2EEEC" } }; }
+        if (dv === 0 && g.tg[j] === d.o.tomgang) { c.font = { bold: true }; c.fill = { type: "pattern", pattern: "solid", fgColor: { argb: "FFE2EEEC" } }; }
       });
     });
 
@@ -2582,8 +2776,32 @@ footer.site-foot { border-top: 1px solid var(--line); padding-block: 26px 40px; 
   $("f").addEventListener("input", e => {
     const unit = e.target.closest(".unit");
     if (unit) state.flere.units[+unit.dataset.i][e.target.dataset.k] = e.target.value;
+    const loanEl = e.target.closest(".loan");
+    if (loanEl) {
+      const i = +loanEl.dataset.i, k = e.target.dataset.k, l = state.loans[i];
+      l[k] = e.target.type === "checkbox" ? e.target.checked : e.target.value;
+      if (k === "type" && l.type === "bank") l.rt = "var";
+      // Felterne afhænger af långiver, rentetype og afdragsfrihed, så kortet tegnes igen.
+      if (k === "type" || k === "rt" || k === "io") {
+        renderLoans();
+        $("loanRows").querySelector(`.loan[data-i="${i}"] [data-k="${k}"]`).focus();
+      }
+    }
     if (e.target.id === "rentetype") udfyldRente();
     render();
+  });
+  $("loanRows").addEventListener("click", e => {
+    const x = e.target.closest(".x");
+    if (!x) return;
+    state.loans.splice(+x.closest(".loan").dataset.i, 1);
+    renderLoans(); render();
+    $("addLoan").focus();
+  });
+  $("addLoan").addEventListener("click", () => {
+    if (state.loans.length >= MAX_LOANS) return;
+    state.loans.push(newLoan(state.loans.some(l => l.type === "rk") ? "bank" : "rk"));
+    renderLoans(); render();
+    $("loanRows").querySelector(".loan:last-child [data-k='rest']").focus();
   });
   $("f").addEventListener("submit", e => e.preventDefault());
   $("unitRows").addEventListener("click", e => {
@@ -2684,6 +2902,7 @@ footer.site-foot { border-top: 1px solid var(--line); padding-block: 26px 40px; 
   $("exNote").textContent = EXNOTE.en;
   vbReset();
   renderComps();
+  renderLoans();
   render();
 })();
 </script>
