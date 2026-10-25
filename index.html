@@ -90,6 +90,9 @@ input:focus-visible, select:focus-visible, button:focus-visible, a:focus-visible
 .points { list-style: none; padding: 0; margin: 26px 0 0; display: flex; flex-wrap: wrap; gap: 8px 20px; font-size: 14px; color: var(--ink); }
 .points li { display: flex; align-items: center; gap: 7px; }
 .points li::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: var(--accent); }
+.trust { display: flex; gap: 10px; align-items: flex-start; margin: 22px 0 0; padding-top: 18px; border-top: 1px solid var(--line); max-width: 56ch; font-size: 14px; color: var(--muted); }
+.trust svg { flex: none; color: var(--accent); margin-top: 1px; }
+.trust b { color: var(--ink); font-weight: 600; }
 
 .board { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 20px; display: grid; gap: 4px; box-shadow: 0 10px 30px -18px rgba(16, 40, 38, .35); }
 .board-head { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; margin-bottom: 6px; }
@@ -240,6 +243,10 @@ footer.site-foot { border-top: 1px solid var(--line); padding-block: 26px 40px; 
         <li>Intet gemmes</li>
         <li>PDF og Excel til banken</li>
       </ul>
+      <p class="trust">
+        <svg width="22" height="22" viewBox="0 0 22 22" aria-hidden="true"><path d="M11 2.5 4 5.2v5.3c0 4.3 3 7.6 7 9 4-1.4 7-4.7 7-9V5.2z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="m7.8 11 2.2 2.2 4.3-4.4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <span><b>Udviklet af en fagperson med erfaring fra ejendomsfinansiering og långivning.</b> Regnet efter danske regler for realkredit, tinglysning og skat.</span>
+      </p>
     </div>
     <aside class="board" aria-label="Aktuelle realkreditrenter">
       <div class="board-head"><b>Renter i beregningen</b><span id="rateDate"></span></div>
