@@ -104,6 +104,12 @@ a { color: var(--accent); }
 footer { color: var(--muted); font-size: 12px; max-width: 80ch; display: grid; gap: 4px; }
 .cta { display: inline-block; justify-self: start; background: var(--accent); color: var(--panel); font-weight: 700; text-decoration: none; padding: 11px 18px; border-radius: 8px; }
 .cta:hover { filter: brightness(1.08); }
+.inp input.txt { font-family: var(--body); padding-right: 10px; }
+.export-head { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; justify-content: space-between; }
+.btns { display: flex; flex-wrap: wrap; gap: 10px; }
+.btn { font: 600 14px/1 var(--body); padding: 11px 16px; border-radius: 8px; border: 1px solid var(--accent); background: var(--accent); color: var(--panel); cursor: pointer; }
+.btn.ghost { background: transparent; color: var(--accent); }
+.btn:disabled { opacity: .6; cursor: progress; }
 </style>
 </head>
 <body>
@@ -119,6 +125,7 @@ footer { color: var(--muted); font-size: 12px; max-width: 80ch; display: grid; g
     <form class="inputs" id="f" autocomplete="off">
       <fieldset>
         <legend>Boligen</legend>
+        <label for="adresse">Adresse eller navn på boligen<span class="inp"><input id="adresse" class="txt" placeholder="F.eks. Vestergade 12, 2. tv., 8000 Aarhus C"></span></label>
         <div class="row">
           <label for="pris">Købspris<span class="inp"><input id="pris" inputmode="numeric" value="2.400.000"><span class="u">kr</span></span></label>
           <label for="leje">Husleje<span class="inp"><input id="leje" inputmode="numeric" value="10.500"><span class="u">kr/md</span></span></label>
@@ -185,6 +192,13 @@ footer { color: var(--muted); font-size: 12px; max-width: 80ch; display: grid; g
         </div>
       </section>
 
+      <section class="card" id="export">
+        <div class="export-head"><h2>Rapport til banken</h2><span class="pill">Pro · gratis i testperioden</span></div>
+        <p class="hint">Hent beregningen som PDF-rapport eller Excel-fil med forudsætninger, første år, rentefølsomhed og 10 års fremskrivning. Skriv adressen øverst, så kommer den med i rapporten.</p>
+        <div class="btns"><button type="button" class="btn" id="btnPdf">Hent PDF</button><button type="button" class="btn ghost" id="btnXlsx">Hent Excel</button></div>
+        <p class="hint" id="exportStatus" role="status"></p>
+      </section>
+
       <section class="card">
         <h2>Første år</h2>
         <table>
@@ -210,7 +224,7 @@ footer { color: var(--muted); font-size: 12px; max-width: 80ch; display: grid; g
           <li>Sammenlign privat udlejning, virksomhedsordningen og selskab</li>
           <li>Tjek om lejen er lovlig: fri leje, det lejedes værdi eller omkostningsbestemt leje</li>
           <li>Hent BBR-data og offentlig vurdering ud fra adressen</li>
-          <li>Gem dine boliger, og hent en PDF-rapport og en Excel-fil, du kan sende til banken</li>
+          <li>Gem dine boliger, så du kan sammenligne dem og vende tilbage senere</li>
         </ul>
         <a class="cta" href="https://tally.so/r/1WA1dp" target="_blank" rel="noopener">Skriv mig op til Pro-versionen</a>
         <p class="hint">Det er gratis. Vi skriver kun til dig, når Pro-versionen er klar. Læs <a href="privatlivspolitik.html">privatlivspolitikken</a>.</p>
@@ -243,6 +257,13 @@ footer { color: var(--muted); font-size: 12px; max-width: 80ch; display: grid; g
   const RENTER = { fast: 4.46, variabel: 2.59 };
   const dec = (v, d) => v.toLocaleString("da-DK", { minimumFractionDigits: d, maximumFractionDigits: d });
 
+  // Biblioteker til eksport hentes først, når nogen klikker på en knap.
+  const LIBS = {
+    jspdf: "vendor/jspdf.umd.min.js",
+    autotable: "vendor/jspdf.plugin.autotable.min.js",
+    exceljs: "vendor/exceljs.min.js"
+  };
+
   function udfyldRente() {
     const type = $("rentetype").value;
     $("rente").value = dec(RENTER[type], 2);
@@ -253,7 +274,7 @@ footer { color: var(--muted); font-size: 12px; max-width: 80ch; display: grid; g
 
   // Ét år med månedlige terminer: renter, bidrag og afdrag. Returnerer ny restgæld.
   function loanYear(state, rMonth, bidragMonth, totalMonths, ioMonths) {
-    let renter = 0, bidrag = 0, afdrag = 0, ydelse = 0;
+    let renter = 0, bidrag = 0, afdrag = 0;
     for (let m = 0; m < 12; m++) {
       if (state.month >= totalMonths || state.rest <= 0) break;
       const i = state.rest * rMonth;
@@ -279,7 +300,8 @@ footer { color: var(--muted); font-size: 12px; max-width: 80ch; display: grid; g
     const ioMonths = o.afdragsfri ? Math.min(120, totalMonths - 1) : 0;
     const state = { rest: loan, month: 0 };
     const years = [];
-    let value = o.pris, leje = o.leje * 12, drift0 = null;
+    let value = o.pris;
+    const leje = o.leje * 12;
     for (let y = 1; y <= 10; y++) {
       const infl = Math.pow(1.02, y - 1);
       const effLeje = leje * infl * (1 - o.tomgang / 100);
@@ -299,8 +321,7 @@ footer { color: var(--muted); font-size: 12px; max-width: 80ch; display: grid; g
       loan, kobsomk, ek, years, y1,
       brutto: o.leje * 12 / o.pris * 100,
       netto: y1.noi / (o.pris + kobsomk) * 100,
-      roe: (y1.cfEfter + y1.afdrag + o.pris * o.vaerdi / 100) / ek * 100,
-      bruttoLeje: o.leje * 12
+      roe: (y1.cfEfter + y1.afdrag + o.pris * o.vaerdi / 100) / ek * 100
     };
   }
 
@@ -312,6 +333,28 @@ footer { color: var(--muted); font-size: 12px; max-width: 80ch; display: grid; g
       faelles: num("faelles"), grundskyld: num("grundskyld"), forsikring: num("forsikring"), vedl: num("vedl"), adm: num("adm"),
       marg: num("marg"), fradrag: num("fradrag")
     };
+  }
+
+  function yearRows(y) {
+    return [
+      ["Husleje efter tomgang", y.effLeje],
+      ["Driftsudgifter", -y.drift],
+      ["Overskud før finansiering", y.noi, true],
+      ["Renter", -y.renter],
+      ["Bidrag", -y.bidrag],
+      ["Afdrag", -y.afdrag],
+      ["Cash flow før skat", y.cfFoer, true],
+      [y.skat >= 0 ? "Skat" : "Skattebesparelse", -y.skat],
+      ["Cash flow efter skat", y.cfEfter, true]
+    ];
+  }
+
+  // Følsomhed: rente -1 til +2 point mod tomgang 0 %, dine tal og 10 %.
+  function sensGrid(o) {
+    const tg = [0, o.tomgang, 10].filter((v, i, a) => a.indexOf(v) === i).sort((a, b) => a - b);
+    const rs = [-1, 0, 1, 2].map(d => o.rente + d).filter(v => v >= 0);
+    const cells = rs.map(rv => tg.map(t => model({ ...o, rente: rv, tomgang: t }).y1.cfEfter / 12));
+    return { tg, rs, cells };
   }
 
   function sign(el, v) { el.classList.toggle("pos", v >= 0); el.classList.toggle("neg", v < 0); }
@@ -333,28 +376,15 @@ footer { color: var(--muted); font-size: 12px; max-width: 80ch; display: grid; g
     $("kRoe").textContent = pct(r.roe);
     sign($("kRoe"), r.roe);
 
-    const rows = [
-      ["Husleje efter tomgang", y.effLeje],
-      ["Driftsudgifter", -y.drift],
-      ["Overskud før finansiering", y.noi, "sum"],
-      ["Renter", -y.renter],
-      ["Bidrag", -y.bidrag],
-      ["Afdrag", -y.afdrag],
-      ["Cash flow før skat", y.cfFoer, "sum"],
-      [y.skat >= 0 ? "Skat" : "Skattebesparelse", -y.skat],
-      ["Cash flow efter skat", y.cfEfter, "sum"]
-    ];
-    $("yr1").innerHTML = rows.map(([t, v, c]) =>
-      `<tr${c ? ' class="sum"' : ""}><td>${t}</td><td class="v ${c ? (v < 0 ? "neg" : "pos") : ""}">${fmt.format(Math.round(v))} kr</td></tr>`
+    $("yr1").innerHTML = yearRows(y).map(([t, v, sum]) =>
+      `<tr${sum ? ' class="sum"' : ""}><td>${t}</td><td class="v ${sum ? (v < 0 ? "neg" : "pos") : ""}">${fmt.format(Math.round(v))} kr</td></tr>`
     ).join("");
 
-    // Følsomhed: rente -1 til +2 point mod tomgang 0 %, dine tal og 10 %.
-    const tg = [0, o.tomgang, 10].filter((v, i, a) => a.indexOf(v) === i).sort((a, b) => a - b);
-    const rs = [-1, 0, 1, 2].map(d => o.rente + d).filter(v => v >= 0);
-    let h = "<thead><tr><th>Rente</th>" + tg.map(t => `<th>Tomgang ${pct(t)}</th>`).join("") + "</tr></thead><tbody>";
-    rs.forEach(rv => {
-      h += `<tr><td>${pct(rv)}</td>` + tg.map(t => {
-        const m = model({ ...o, rente: rv, tomgang: t }).y1.cfEfter / 12;
+    const g = sensGrid(o);
+    let h = "<thead><tr><th>Rente</th>" + g.tg.map(t => `<th>Tomgang ${pct(t)}</th>`).join("") + "</tr></thead><tbody>";
+    g.rs.forEach((rv, i) => {
+      h += `<tr><td>${pct(rv)}</td>` + g.tg.map((t, j) => {
+        const m = g.cells[i][j];
         const base = rv === o.rente && t === o.tomgang;
         return `<td class="${base ? "base " : ""}${m < 0 ? "neg" : "pos"}">${fmt.format(Math.round(m))}</td>`;
       }).join("") + "</tr>";
@@ -392,6 +422,292 @@ footer { color: var(--muted); font-size: 12px; max-width: 80ch; display: grid; g
     $("chartNote").textContent =
       `Du lægger ${kr(r.ek)} i boligen. Efter 10 år er din friværdi ${kr(end.frivaerdi)} med ${pct(o.vaerdi)} årlig værdistigning, og du har samlet haft ${kr(cum[10])} i cash flow efter skat. Leje og udgifter stiger 2 % om året.`;
   }
+
+  // ---------- Rapport til banken (PDF og Excel) ----------
+
+  const loaded = {};
+  function loadScript(src) {
+    if (!loaded[src]) {
+      loaded[src] = new Promise((resolve, reject) => {
+        const s = document.createElement("script");
+        s.src = src; s.onload = resolve;
+        s.onerror = () => { delete loaded[src]; reject(new Error("Kunne ikke hente " + src)); };
+        document.head.appendChild(s);
+      });
+    }
+    return loaded[src];
+  }
+
+  async function saveBlob(filename, blob) {
+    const downloads = window.claude && window.claude.use ? await window.claude.use("downloads") : null;
+    if (downloads) { await downloads.save({ filename, data: blob }); return; }
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob); a.download = filename;
+    document.body.appendChild(a); a.click();
+    setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 2000);
+  }
+
+  // Formater et tal efter type: kr, kr/md, kr/år, %, år eller tekst.
+  function show(v, f) {
+    switch (f) {
+      case "kr": return kr(v);
+      case "krmd": return fmt.format(Math.round(v)) + " kr/md";
+      case "kraar": return fmt.format(Math.round(v)) + " kr/år";
+      case "pct": return pct(v);
+      case "pct2": return dec(v, 2) + " %";
+      case "aar": return fmt.format(v) + " år";
+      default: return String(v);
+    }
+  }
+
+  function reportData() {
+    const o = read(), r = model(o);
+    const adresse = $("adresse").value.trim();
+    const today = new Date();
+    return {
+      o, r,
+      title: adresse || "Udlejningsbolig",
+      adresse,
+      dato: today.toLocaleDateString("da-DK", { day: "numeric", month: "long", year: "numeric" }),
+      isoDato: today.toISOString().slice(0, 10),
+      kpis: [
+        ["Cash flow efter skat", r.y1.cfEfter / 12, "krmd"],
+        ["Bruttoafkast", r.brutto, "pct"],
+        ["Nettoafkast", r.netto, "pct"],
+        ["Forrentning af egenkapital", r.roe, "pct"]
+      ],
+      inputs: [
+        ["Bolig og drift", [
+          ["Købspris", o.pris, "kr"], ["Husleje", o.leje, "krmd"], ["Tomgang", o.tomgang, "pct"],
+          ["Værdistigning pr. år", o.vaerdi, "pct"], ["Fællesudgifter", o.faelles, "krmd"], ["Grundskyld", o.grundskyld, "kraar"],
+          ["Forsikring", o.forsikring, "kraar"], ["Vedligehold, andel af leje", o.vedl, "pct"],
+          ["Administration, andel af leje", o.adm, "pct"], ["Købsomkostninger i alt", r.kobsomk, "kr"]
+        ]],
+        ["Finansiering og skat", [
+          ["Realkreditlån", r.loan, "kr"], ["Belåningsgrad", o.belaan, "pct"],
+          ["Rentetype", $("rentetype").selectedOptions[0].textContent, "txt"], ["Rente", o.rente, "pct2"],
+          ["Bidragssats", o.bidrag, "pct2"], ["Løbetid", o.loebetid, "aar"],
+          ["Afdragsfrihed", o.afdragsfri ? "De første 10 år" : "Nej", "txt"], ["Egenkapital inkl. omkostninger", r.ek, "kr"],
+          ["Skat af overskud", o.marg, "pct"], ["Værdi af rentefradrag", o.fradrag, "pct"]
+        ]]
+      ],
+      yr1: yearRows(r.y1),
+      sens: sensGrid(o),
+      yearCols: ["År", "Husleje", "Drift", "Overskud", "Renter og bidrag", "Afdrag", "Skat", "Cash flow efter skat", "Restgæld", "Boligværdi", "Friværdi"],
+      yearVals: r.years.map(y => [y.y, y.effLeje, -y.drift, y.noi, -(y.renter + y.bidrag), -y.afdrag, -y.skat, y.cfEfter, y.rest, y.value, y.frivaerdi])
+    };
+  }
+
+  function fileName(d, ext) {
+    const navn = (d.adresse || "bolig").replace(/[\\/:*?"<>|]+/g, " ").replace(/\s+/g, " ").trim().slice(0, 60);
+    return `Udlejningsberegning - ${navn} - ${d.isoDato}.${ext}`;
+  }
+
+  // jsPDF's standardskrift kender ikke smalle mellemrum og minustegn.
+  const asc = s => String(s).replace(/[  ]/g, " ").replace(/−/g, "-");
+
+  async function exportPdf() {
+    await loadScript(LIBS.jspdf);
+    await loadScript(LIBS.autotable);
+    const d = reportData();
+    const doc = new window.jspdf.jsPDF({ unit: "mm", format: "a4" });
+    const ACC = [31, 95, 91], INK = [22, 32, 31], MUT = [91, 106, 103], SOFT = [226, 238, 236], NEG = [177, 58, 51];
+    const W = 210, M = 16;
+
+    doc.setFont("helvetica", "bold"); doc.setFontSize(17); doc.setTextColor(...INK);
+    doc.text("Investeringsberegning for udlejningsbolig", M, 22);
+    doc.setFont("helvetica", "normal"); doc.setFontSize(10.5); doc.setTextColor(...MUT);
+    doc.text(asc(d.title), M, 29);
+    doc.text(asc("Udarbejdet " + d.dato + " med udlejningsberegner.dk"), M, 34.5);
+
+    const bw = (W - 2 * M - 3 * 4) / 4, y0 = 41;
+    d.kpis.forEach(([label, v, f], i) => {
+      const x = M + i * (bw + 4);
+      doc.setDrawColor(217, 225, 223); doc.setFillColor(244, 246, 245);
+      doc.roundedRect(x, y0, bw, 18, 2, 2, "FD");
+      doc.setFont("helvetica", "normal"); doc.setFontSize(8); doc.setTextColor(...MUT);
+      doc.text(asc(label), x + 3, y0 + 6);
+      doc.setFont("helvetica", "bold"); doc.setFontSize(12.5);
+      doc.setTextColor(...(v < 0 ? NEG : INK));
+      doc.text(asc(show(v, f)), x + 3, y0 + 13.5);
+    });
+
+    const base = {
+      theme: "striped",
+      styles: { font: "helvetica", fontSize: 9, cellPadding: 1.6, textColor: INK },
+      headStyles: { fillColor: ACC, textColor: 255, fontStyle: "bold" },
+      alternateRowStyles: { fillColor: [246, 248, 247] },
+      margin: { left: M, right: M, bottom: 18 }
+    };
+    // Overskrifter over talkolonner højrestilles som tallene.
+    const rightHead = cols => c => { if (c.section === "head" && cols.includes(c.column.index)) c.cell.styles.halign = "right"; };
+    let y = y0 + 27;
+    const heading = (t, extra) => {
+      if (y > 250) { doc.addPage(); y = 20; }
+      doc.setFont("helvetica", "bold"); doc.setFontSize(11.5); doc.setTextColor(...INK);
+      doc.text(asc(t), M, y);
+      if (extra) { doc.setFont("helvetica", "normal"); doc.setFontSize(8.5); doc.setTextColor(...MUT); doc.text(asc(extra), M, y + 4.5); y += 4.5; }
+      y += 2.5;
+    };
+    const after = () => { y = doc.lastAutoTable.finalY + 9; };
+
+    // Forudsætninger i to kolonner side om side.
+    heading("Forudsætninger");
+    const [a, b] = d.inputs;
+    const rows = [];
+    for (let i = 0; i < Math.max(a[1].length, b[1].length); i++) {
+      const l = a[1][i], rr = b[1][i];
+      rows.push([l ? l[0] : "", l ? asc(show(l[1], l[2])) : "", rr ? rr[0] : "", rr ? asc(show(rr[1], rr[2])) : ""]);
+    }
+    doc.autoTable({ ...base, startY: y, head: [[a[0], "", b[0], ""]], body: rows,
+      columnStyles: { 0: { textColor: MUT }, 1: { halign: "right" }, 2: { textColor: MUT }, 3: { halign: "right" } } });
+    after();
+
+    heading("Første år");
+    const sumRows = new Set(d.yr1.map((r, i) => (r[2] ? i : -1)));
+    doc.autoTable({ ...base, startY: y, head: [["Post", "Beløb"]],
+      body: d.yr1.map(([t, v]) => [t, asc(kr(v))]),
+      columnStyles: { 1: { halign: "right" } },
+      didParseCell: c => {
+        rightHead([1])(c);
+        if (c.section !== "body") return;
+        if (sumRows.has(c.row.index)) c.cell.styles.fontStyle = "bold";
+        if (c.column.index === 1 && d.yr1[c.row.index][1] < 0 && sumRows.has(c.row.index)) c.cell.styles.textColor = NEG;
+      } });
+    after();
+
+    heading("Rentefølsomhed", "Cash flow efter skat pr. måned ved forskellige renter og tomgang. Det fremhævede felt er beregningens tal.");
+    const g = d.sens;
+    doc.autoTable({ ...base, startY: y,
+      head: [["Rente", ...g.tg.map(t => asc("Tomgang " + pct(t)))]],
+      body: g.rs.map((rv, i) => [asc(dec(rv, 2) + " %"), ...g.cells[i].map(v => asc(fmt.format(Math.round(v)) + " kr"))]),
+      columnStyles: Object.fromEntries(g.tg.map((t, j) => [j + 1, { halign: "right" }])),
+      didParseCell: c => {
+        rightHead(g.tg.map((t, j) => j + 1))(c);
+        if (c.section !== "body" || c.column.index === 0) return;
+        const i = c.row.index, j = c.column.index - 1;
+        if (g.rs[i] === d.o.rente && g.tg[j] === d.o.tomgang) { c.cell.styles.fillColor = SOFT; c.cell.styles.fontStyle = "bold"; }
+        if (g.cells[i][j] < 0) c.cell.styles.textColor = NEG;
+      } });
+    after();
+
+    doc.addPage(); y = 20;
+    heading("Fremskrivning over 10 år", "Husleje og udgifter stiger 2 % om året. Boligværdien stiger " + pct(d.o.vaerdi) + " om året. Alle beløb i kr.");
+    doc.autoTable({ ...base, startY: y,
+      styles: { ...base.styles, fontSize: 7.4, cellPadding: 1.3 },
+      head: [d.yearCols],
+      body: d.yearVals.map(row => row.map((v, i) => (i === 0 ? String(v) : asc(fmt.format(Math.round(v)))))),
+      columnStyles: Object.fromEntries(d.yearCols.map((c, i) => [i, { halign: i === 0 ? "left" : "right", cellWidth: i === 0 ? 8 : 17 }])),
+      didParseCell: rightHead(d.yearCols.map((c, i) => i).slice(1)) });
+
+    const pages = doc.getNumberOfPages();
+    for (let p = 1; p <= pages; p++) {
+      doc.setPage(p);
+      doc.setFont("helvetica", "normal"); doc.setFontSize(7.5); doc.setTextColor(...MUT);
+      doc.text(asc("Beregningen er vejledende og er ikke skatte- eller investeringsrådgivning. Renter fra Nykredit 22. oktober 2026."), M, 287);
+      doc.text(`Side ${p} af ${pages}`, W - M, 287, { align: "right" });
+    }
+
+    await saveBlob(fileName(d, "pdf"), doc.output("blob"));
+  }
+
+  async function exportXlsx() {
+    await loadScript(LIBS.exceljs);
+    const d = reportData();
+    const wb = new window.ExcelJS.Workbook();
+    wb.creator = "Udlejningsberegneren"; wb.created = new Date();
+    const NF = { kr: '#,##0 "kr"', krmd: '#,##0 "kr/md"', kraar: '#,##0 "kr/år"', pct: "0.0%", pct2: "0.00%", aar: '0 "år"' };
+    const cellVal = (v, f) => (f === "pct" || f === "pct2" ? v / 100 : f.startsWith("kr") ? Math.round(v) : v);
+    const headRow = row => {
+      row.font = { bold: true, color: { argb: "FFFFFFFF" } };
+      row.eachCell(c => { c.fill = { type: "pattern", pattern: "solid", fgColor: { argb: "FF1F5F5B" } }; });
+    };
+    const muted = { color: { argb: "FF5B6A67" } };
+
+    const ws = wb.addWorksheet("Oversigt");
+    ws.columns = [{ width: 34 }, { width: 18 }, { width: 3 }, { width: 34 }, { width: 18 }];
+    ws.addRow(["Investeringsberegning for udlejningsbolig"]).font = { bold: true, size: 14 };
+    ws.addRow([d.title]);
+    ws.addRow(["Udarbejdet " + d.dato + " med udlejningsberegner.dk"]).font = muted;
+    ws.addRow([]);
+
+    headRow(ws.addRow(["Nøgletal", ""]));
+    [...d.kpis, ["Egenkapital inkl. omkostninger", d.r.ek, "kr"]].forEach(([l, v, f]) => {
+      const row = ws.addRow([l, cellVal(v, f)]);
+      row.getCell(2).numFmt = NF[f];
+    });
+    ws.addRow([]);
+
+    // Forudsætninger side om side, ligesom i PDF'en.
+    const [a, b] = d.inputs;
+    headRow(ws.addRow([a[0], "", "", b[0], ""]));
+    ws.lastRow.getCell(3).fill = { type: "pattern", pattern: "none" };
+    for (let i = 0; i < Math.max(a[1].length, b[1].length); i++) {
+      const l = a[1][i], rr = b[1][i];
+      const row = ws.addRow([l ? l[0] : "", l ? cellVal(l[1], l[2]) : "", "", rr ? rr[0] : "", rr ? cellVal(rr[1], rr[2]) : ""]);
+      if (l && NF[l[2]]) row.getCell(2).numFmt = NF[l[2]];
+      if (rr && NF[rr[2]]) row.getCell(5).numFmt = NF[rr[2]];
+      row.getCell(2).alignment = row.getCell(5).alignment = { horizontal: "right" };
+    }
+    ws.addRow([]);
+
+    headRow(ws.addRow(["Første år", "Beløb"]));
+    d.yr1.forEach(([t, v, sum]) => {
+      const row = ws.addRow([t, Math.round(v)]);
+      row.getCell(2).numFmt = NF.kr;
+      if (sum) row.font = { bold: true };
+    });
+    ws.addRow([]);
+    ws.addRow(["Beregningen er vejledende og er ikke skatte- eller investeringsrådgivning. Renter fra Nykredit 22. oktober 2026."]).font = muted;
+
+    const ws2 = wb.addWorksheet("10 år");
+    ws2.columns = d.yearCols.map((c, i) => ({ width: i === 0 ? 6 : 15 }));
+    headRow(ws2.addRow(d.yearCols));
+    d.yearVals.forEach(vals => {
+      const row = ws2.addRow(vals.map((v, i) => (i === 0 ? v : Math.round(v))));
+      for (let i = 2; i <= vals.length; i++) row.getCell(i).numFmt = "#,##0";
+    });
+    ws2.addRow([]);
+    ws2.addRow(["Husleje og udgifter stiger 2 % om året. Alle beløb i kr."]).font = muted;
+
+    const ws3 = wb.addWorksheet("Rentefølsomhed");
+    const g = d.sens;
+    ws3.columns = [{ width: 12 }, ...g.tg.map(() => ({ width: 18 }))];
+    ws3.addRow(["Cash flow efter skat pr. måned ved forskellige renter og tomgang"]).font = { bold: true };
+    headRow(ws3.addRow(["Rente", ...g.tg.map(t => "Tomgang " + pct(t))]));
+    g.rs.forEach((rv, i) => {
+      const row = ws3.addRow([rv / 100, ...g.cells[i].map(v => Math.round(v))]);
+      row.getCell(1).numFmt = NF.pct2;
+      g.cells[i].forEach((v, j) => {
+        const c = row.getCell(j + 2);
+        c.numFmt = NF.krmd;
+        if (rv === d.o.rente && g.tg[j] === d.o.tomgang) { c.font = { bold: true }; c.fill = { type: "pattern", pattern: "solid", fgColor: { argb: "FFE2EEEC" } }; }
+      });
+    });
+
+    const buf = await wb.xlsx.writeBuffer();
+    await saveBlob(fileName(d, "xlsx"), new Blob([buf], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" }));
+  }
+
+  function wire(btnId, fn, label) {
+    $(btnId).addEventListener("click", async () => {
+      const btn = $(btnId), status = $("exportStatus");
+      btn.disabled = true; status.textContent = "Laver " + label + " …";
+      try {
+        await fn();
+        status.textContent = label + " er klar.";
+      } catch (err) {
+        status.textContent = err && err.code === "declined"
+          ? "Download annulleret."
+          : label + " kunne ikke laves. Prøv igen, eller kontakt os, hvis det bliver ved.";
+        console.error(err);
+      } finally {
+        btn.disabled = false;
+      }
+    });
+  }
+  wire("btnPdf", exportPdf, "PDF'en");
+  wire("btnXlsx", exportXlsx, "Excel-filen");
 
   $("f").addEventListener("input", e => {
     if (e.target.id === "rentetype") udfyldRente();
