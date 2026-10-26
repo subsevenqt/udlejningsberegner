@@ -8,3 +8,4 @@ Siden er ren HTML uden byggetrin og hostes med GitHub Pages på udlejningsberegn
 - `privatlivspolitik.html` er privatlivspolitikken for ventelisten
 - Renterne står i `RENTER` i `index.html` og opdateres i hånden
 - `vendor/` har bibliotekerne til PDF og Excel, og `fonts/` har skrifttyperne. Begge hostes selv, så siden ikke henter noget fra tredjeparter
+- Besøgsstatistik uden cookies via GoatCounter (https://udlejningsberegner.goatcounter.com). `vendor/goatcounter-count.js` er en selvhostet kopi af count.js, så kun selve tællingen sendes til GoatCounter
