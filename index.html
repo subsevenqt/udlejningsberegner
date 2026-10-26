@@ -126,10 +126,11 @@ input:focus-visible, select:focus-visible, button:focus-visible, a:focus-visible
 .exnote { color: var(--muted); font-size: 13px; margin: 0 0 18px; }
 .sit { display: inline-grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 4px; padding: 4px; border-radius: 12px; background: var(--hero); border: 1px solid var(--line); margin-bottom: 18px; max-width: 760px; width: 100%; }
 @media (max-width: 560px) { .sit { grid-template-columns: minmax(0, 1fr); } }
-.sit button { display: grid; gap: 2px; text-align: left; padding: 12px 16px; border-radius: 9px; border: 0; background: transparent; color: var(--ink); font: inherit; cursor: pointer; }
+.sit button { display: grid; gap: 2px; text-align: left; padding: 12px 16px; border-radius: 9px; border: 1.5px solid transparent; background: transparent; color: var(--ink); font: inherit; cursor: pointer; }
 .sit button b { font-size: 15px; }
 .sit button span { font-size: 13px; color: var(--muted); }
-.sit button[aria-checked="true"] { background: var(--panel); box-shadow: 0 1px 3px rgba(16, 40, 38, .18); }
+.sit button:hover { border-color: var(--line); }
+.sit button[aria-checked="true"] { background: var(--accent-soft); border-color: var(--accent); box-shadow: 0 1px 3px rgba(16, 40, 38, .18); }
 .sit button[aria-checked="true"] b { color: var(--accent); }
 .kat-label { margin: 0 0 8px; font-size: 13px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); }
 .stack-sm { display: grid; gap: 12px; }
@@ -333,7 +334,7 @@ fieldset.q legend { text-transform: none; letter-spacing: 0; font-size: 14px; co
 footer.site-foot { border-top: 1px solid var(--line); padding-block: 26px 40px; color: var(--muted); font-size: 13px; }
 .foot { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 12px 24px; }
 .foot p { margin: 0; max-width: 70ch; }
-@media (prefers-reduced-motion: no-preference) { .btn, .kat button { transition: background .15s, border-color .15s, filter .15s; } }
+@media (prefers-reduced-motion: no-preference) { .btn, .kat button, .sit button { transition: background .15s, border-color .15s, filter .15s; } }
 </style>
 <script data-goatcounter="https://udlejningsberegner.goatcounter.com/count" async src="vendor/goatcounter-count.js"></script>
 </head>
